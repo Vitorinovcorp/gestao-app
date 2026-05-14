@@ -45,6 +45,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        // Reverter alterações se necessário
+        // Reverter alterações se necessário 
     }
 };

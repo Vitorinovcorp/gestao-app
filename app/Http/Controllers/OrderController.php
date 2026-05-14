@@ -201,24 +201,24 @@ class OrderController extends Controller
     }
 
     public function close($id)
-    {
-        try {
-            $order = Order::findOrFail($id);
-            $order->status = 'confirmed';
-            $order->confirmed_at = now();
-            $order->save();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Encomenda confirmada com sucesso'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erro ao confirmar encomenda: ' . $e->getMessage()
-            ], 500);
-        }
+{
+    try {
+        $order = Order::findOrFail($id);
+        $order->status = 'confirmada'; // MUDE de 'confirmed' para 'confirmada'
+        $order->confirmed_at = now();
+        $order->save();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Encomenda confirmada com sucesso'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Erro ao confirmar encomenda: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     public function convertToSupplierOrders($id)
     {

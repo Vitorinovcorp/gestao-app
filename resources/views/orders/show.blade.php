@@ -12,14 +12,14 @@
         </div>
         <div class="flex space-x-2">
             <button onclick="window.location.href='/orders'" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
-                ← Voltar
+                Voltar
             </button>
             <button onclick="downloadPdf()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                📄 Descarregar PDF
+                Descarregar PDF
             </button>
             @if($encomenda->status == 'rascunho')
             <button onclick="confirmOrder()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                ✓ Confirmar Encomenda
+                Confirmar Encomenda
             </button>
             @endif
         </div>
