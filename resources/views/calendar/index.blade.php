@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Calendário')
-@section('header', 'Calendário')
+@section('title', 'Calendário Inovcorp')
+@section('header', 'Calendário Inovcorp')
 
 @section('content')
 <div class="bg-white rounded-lg shadow p-4">
@@ -134,10 +134,12 @@ function loadFilters() {
         .then(data => {
             const select = document.getElementById('filterUser');
             const users = data.data || [];
+            select.innerHTML = '<option value="">Todos os Utilizadores</option>';
             users.forEach(user => {
                 select.innerHTML += `<option value="${user.id}">${user.name}</option>`;
             });
-        });
+        })
+        .catch(error => console.error('Erro ao carregar users:', error));
     
     // Carregar entidades
     fetch('/api/entities')
@@ -145,6 +147,7 @@ function loadFilters() {
         .then(data => {
             const select = document.getElementById('filterEntity');
             const entities = data.data || [];
+            select.innerHTML = '<option value="">Todas as Entidades</option>';
             entities.forEach(entity => {
                 select.innerHTML += `<option value="${entity.id}">${entity.name}</option>`;
             });
@@ -154,27 +157,46 @@ function loadFilters() {
             entities.forEach(entity => {
                 selectEntity.innerHTML += `<option value="${entity.id}">${entity.name}</option>`;
             });
-        });
+        })
+        .catch(error => console.error('Erro ao carregar entities:', error));
     
     // Carregar tipos
     fetch('/api/calendar/types')
         .then(response => response.json())
         .then(data => {
+            console.log('Tipos carregados:', data);
             const select = document.getElementById('type_id');
-            data.forEach(type => {
-                select.innerHTML += `<option value="${type.id}">${type.name}</option>`;
-            });
-        });
+            select.innerHTML = '<option value="">Selecione um Tipo</option>';
+            if (Array.isArray(data)) {
+                data.forEach(type => {
+                    select.innerHTML += `<option value="${type.id}">${type.name}</option>`;
+                });
+            } else if (data.data) {
+                data.data.forEach(type => {
+                    select.innerHTML += `<option value="${type.id}">${type.name}</option>`;
+                });
+            }
+        })
+        .catch(error => console.error('Erro ao carregar types:', error));
     
     // Carregar ações
     fetch('/api/calendar/actions')
         .then(response => response.json())
         .then(data => {
+            console.log('Ações carregadas:', data);
             const select = document.getElementById('action_id');
-            data.forEach(action => {
-                select.innerHTML += `<option value="${action.id}">${action.name}</option>`;
-            });
-        });
+            select.innerHTML = '<option value="">Selecione uma Ação</option>';
+            if (Array.isArray(data)) {
+                data.forEach(action => {
+                    select.innerHTML += `<option value="${action.id}">${action.name}</option>`;
+                });
+            } else if (data.data) {
+                data.data.forEach(action => {
+                    select.innerHTML += `<option value="${action.id}">${action.name}</option>`;
+                });
+            }
+        })
+        .catch(error => console.error('Erro ao carregar actions:', error));
 }
 
 function loadEvents() {

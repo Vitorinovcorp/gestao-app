@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+    public function up()
     {
         Schema::create('calendar_events', function (Blueprint $table) {
             $table->id();
@@ -26,20 +26,15 @@ return new class extends Migration
             $table->boolean('is_all_day')->default(false);
             $table->boolean('requires_confirmation')->default(false);
             $table->boolean('is_confirmed')->default(false);
+            $table->string('share')->default('private');
+            $table->string('knowledge')->default('medium');
             $table->json('reminders')->nullable();
             $table->json('attendees')->nullable();
             $table->timestamps();
-            
-            // Indexes
-            $table->index('start_datetime');
-            $table->index('user_id');
-            $table->index('entity_id');
-            $table->index('assigned_to');
-            $table->index('status');
         });
     }
 
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('calendar_events');
     }

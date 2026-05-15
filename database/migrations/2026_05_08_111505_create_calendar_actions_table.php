@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
-    public function up(): void
+    public function up()
     {
         Schema::create('calendar_actions', function (Blueprint $table) {
             $table->id();
@@ -19,17 +19,16 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Inserir ações padrão
+        // Dados padrão
         DB::table('calendar_actions')->insert([
-            ['name' => 'Follow-up', 'description' => 'Acompanhamento pós-venda', 'requires_followup' => false, 'default_duration' => 30, 'is_active' => true],
-            ['name' => 'Apresentação', 'description' => 'Apresentação de produtos/serviços', 'requires_followup' => true, 'default_duration' => 60, 'is_active' => true],
-            ['name' => 'Negociação', 'description' => 'Negociação de condições', 'requires_followup' => true, 'default_duration' => 90, 'is_active' => true],
-            ['name' => 'Suporte', 'description' => 'Apoio técnico ao cliente', 'requires_followup' => false, 'default_duration' => 45, 'is_active' => true],
-            ['name' => 'Formação', 'description' => 'Sessão de formação', 'requires_followup' => false, 'default_duration' => 120, 'is_active' => true],
+            ['name' => 'Acompanhamento', 'description' => 'Acompanhamento', 'default_duration' => 30],
+            ['name' => 'Apresentação', 'description' => 'Apresentação de produtos', 'default_duration' => 60],
+            ['name' => 'Negociação', 'description' => 'Negociação de condições', 'default_duration' => 90],
+            ['name' => 'Suporte', 'description' => 'Apoio técnico', 'default_duration' => 45],
         ]);
     }
 
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('calendar_actions');
     }

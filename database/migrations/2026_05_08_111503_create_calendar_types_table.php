@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
-    public function up(): void
+    public function up()
     {
         Schema::create('calendar_types', function (Blueprint $table) {
             $table->id();
@@ -18,18 +18,17 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Inserir tipos padrão
+        // Dados padrão
         DB::table('calendar_types')->insert([
             ['name' => 'Reunião', 'color' => '#3B82F6', 'is_active' => true],
             ['name' => 'Chamada', 'color' => '#10B981', 'is_active' => true],
             ['name' => 'Visita', 'color' => '#F59E0B', 'is_active' => true],
             ['name' => 'Prazo', 'color' => '#EF4444', 'is_active' => true],
             ['name' => 'Tarefa', 'color' => '#8B5CF6', 'is_active' => true],
-            ['name' => 'Evento', 'color' => '#EC4899', 'is_active' => true],
         ]);
     }
 
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('calendar_types');
     }
