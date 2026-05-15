@@ -200,7 +200,7 @@ function loadProposals() {
 function renderTable(proposals) {
     const tbody = document.getElementById('proposalsTable');
     if (!proposals || proposals.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">Nenhuma proposta encontrada</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">Nenhuma proposta encontrada<\/td></tr>';
         return;
     }
     
@@ -213,19 +213,22 @@ function renderTable(proposals) {
                            (p.status === 'sent' ? 'Enviada' :
                            (p.status === 'rejected' ? 'Rejeitada' : 'Rascunho'));
         
+        const proposalDate = p.proposal_date ? p.proposal_date.split('T')[0] : '-';
+        const validityDate = p.validity ? p.validity.split('T')[0] : '-';
+        
         html += `<tr class="hover:bg-gray-50">
-            <td class="px-6 py-4 text-sm">${p.proposal_date || '-'}</td>
-            <td class="px-6 py-4 text-sm font-mono font-medium">${p.number}</td>
-            <td class="px-6 py-4 text-sm">${p.validity || '-'}</td>
-            <td class="px-6 py-4 text-sm">${p.client?.name || '-'}</td>
-            <td class="px-6 py-4 text-sm font-semibold">€ ${parseFloat(p.total_value).toFixed(2)}</td>
-            <td class="px-6 py-4 text-sm"><span class="px-2 py-1 text-xs rounded ${statusClass}">${statusLabel}</span></td>
+            <td class="px-6 py-4 text-sm">${proposalDate}<\/td>
+            <td class="px-6 py-4 text-sm font-mono font-medium">${p.number}<\/td>
+            <td class="px-6 py-4 text-sm">${validityDate}<\/td>
+            <td class="px-6 py-4 text-sm">${p.client?.name || '-'}<\/td>
+            <td class="px-6 py-4 text-sm font-semibold">€ ${parseFloat(p.total_value).toFixed(2)}<\/td>
+            <td class="px-6 py-4 text-sm"><span class="px-2 py-1 text-xs rounded ${statusClass}">${statusLabel}<\/span><\/td>
             <td class="px-6 py-4 text-sm space-x-2">
-                <button onclick="viewProposal(${p.id})" class="text-blue-600 hover:text-blue-800">Ver</button>
-                <button onclick="downloadPdf(${p.id})" class="text-green-600 hover:text-green-800">PDF</button>
-                ${p.status === 'closed' ? `<button onclick="convertToOrder(${p.id})" class="text-purple-600 hover:text-purple-800">Converter</button>` : ''}
-                <button onclick="deleteProposal(${p.id})" class="text-red-600 hover:text-red-800">Eliminar</button>
-            </td>
+                <button onclick="viewProposal(${p.id})" class="text-blue-600 hover:text-blue-800">Ver<\/button>
+                <button onclick="downloadPdf(${p.id})" class="text-green-600 hover:text-green-800">PDF<\/button>
+                ${p.status === 'closed' ? `<button onclick="convertToOrder(${p.id})" class="text-purple-600 hover:text-purple-800">Converter<\/button>` : ''}
+                <button onclick="deleteProposal(${p.id})" class="text-red-600 hover:text-red-800">Eliminar<\/button>
+            <\/td>
         </tr>`;
     });
     tbody.innerHTML = html;

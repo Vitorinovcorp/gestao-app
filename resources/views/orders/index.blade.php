@@ -293,7 +293,7 @@
             const statusLabel = getStatusLabel(order.status);
 
             html += `<tr class="hover:bg-gray-50">
-            <td class="px-6 py-4 text-sm">${order.order_date || '-'}<\/td>
+            <td class="px-6 py-4 text-sm">${order.order_date ? order.order_date.split('T')[0] : '-'}<\/td>
             <td class="px-6 py-4 text-sm font-mono font-medium">${order.number}<\/td>
             <td class="px-6 py-4 text-sm">${order.client?.name || '-'}<\/td>
             <td class="px-6 py-4 text-sm font-semibold">€ ${(Math.round(order.total_value * 100) / 100).toFixed(2)}<\/td>

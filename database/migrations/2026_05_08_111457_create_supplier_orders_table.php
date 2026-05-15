@@ -14,7 +14,7 @@ return new class extends Migration
             $table->date('order_date');
             $table->foreignId('supplier_id')->constrained('entities');
             $table->foreignId('customer_order_id')->nullable()->constrained('orders');
-            $table->enum('status', ['draft', 'sent', 'confirmed', 'received', 'cancelled'])->default('draft');
+            $table->enum('status', ['rascunho', 'enviada', 'confirmada', 'recebida', 'cancelada'])->default('rascunho');
             $table->decimal('subtotal', 12, 2)->default(0);
             $table->decimal('vat_total', 12, 2)->default(0);
             $table->decimal('total_value', 12, 2)->default(0);

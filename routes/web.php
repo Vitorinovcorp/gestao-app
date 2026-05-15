@@ -7,6 +7,7 @@ use App\Http\Controllers\{
     ArticleController,
     ProposalController,
     OrderController,
+    SupplierInvoiceController,
     SupplierOrderController,
     FinancialController,
     CalendarController,
@@ -24,6 +25,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return redirect('/dashboard');
 });
+
 Route::get('/teste-proposta', function () {
     return view('teste_proposta');
 });
@@ -53,7 +55,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/api/dashboard/stats', [DashboardController::class, 'stats'])->name('dashboard.stats');
 
-    // ==================== ROTAS DE VIEW (HTML) ====================
+    // ==================== VIEWS (DEVEM VIR PRIMEIRO) ====================
     Route::view('/articles', 'articles.index')->name('articles.index');
     Route::view('/entities', 'entities.index')->name('entities.index');
     Route::view('/contacts', 'contacts.index')->name('contacts.index');
@@ -67,23 +69,23 @@ Route::middleware(['auth'])->group(function () {
     Route::view('/logs', 'logs.index')->name('logs.index');
     Route::view('/settings', 'settings.index')->name('settings.index');
 
-    // Detalhes (com dados do banco)
+    // VIEWS com parâmetros
     Route::get('/proposals/{id}', function ($id) {
         $proposta = App\Models\Proposal::with(['client', 'createdBy', 'lines.article'])->findOrFail($id);
         return view('proposals.show', compact('proposta'));
     })->name('proposals.show');
-
-    Route::get('/encomenda/{id}', function ($id) {
-        $encomenda = App\Models\Order::with(['client', 'createdBy', 'lines.article'])->findOrFail($id);
-        return view('orders.show', compact('encomenda'));
-    })->name('orders.show');
 
     Route::get('/orders/{id}', function ($id) {
         $encomenda = App\Models\Order::with(['client', 'createdBy', 'lines.article'])->findOrFail($id);
         return view('orders.show', compact('encomenda'));
     })->name('orders.show');
 
-    // ==================== ROTAS DE API (JSON) ====================
+    // Faturas de Fornecedor - VIEW
+    Route::get('/supplier-invoices', function () {
+        return view('supplier-invoices');
+    })->name('supplier-invoices.index');
+
+    // ==================== ROTAS DE API (DEVEM VIR DEPOIS) ====================
     Route::prefix('api')->group(function () {
 
         // Entities API
@@ -156,22 +158,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/generate-number', [OrderController::class, 'generateNumber'])->name('generate-number');
         });
 
-        // Supplier Orders API
-        Route::prefix('supplier-orders')->name('api.supplier-orders.')->group(function () {
-            Route::get('/', [SupplierOrderController::class, 'index'])->name('index');
-            Route::post('/', [SupplierOrderController::class, 'store'])->name('store');
-            Route::get('/{supplierOrder}', [SupplierOrderController::class, 'show'])->name('show');
-            Route::put('/{supplierOrder}', [SupplierOrderController::class, 'update'])->name('update');
-            Route::delete('/{supplierOrder}', [SupplierOrderController::class, 'destroy'])->name('destroy');
-            Route::post('/{supplierOrder}/close', [SupplierOrderController::class, 'close'])->name('close');
-            Route::get('/{supplierOrder}/download-pdf', [SupplierOrderController::class, 'downloadPdf'])->name('download-pdf');
-            Route::post('/{supplierOrder}/add-line', [SupplierOrderController::class, 'addLine'])->name('add-line');
-            Route::put('/{supplierOrder}/line/{line}', [SupplierOrderController::class, 'updateLine'])->name('update-line');
-            Route::delete('/{supplierOrder}/line/{line}', [SupplierOrderController::class, 'deleteLine'])->name('delete-line');
-            Route::get('/generate-number', [SupplierOrderController::class, 'generateNumber'])->name('generate-number');
-        });
-
-        // Financial API
+        // Financial API (incluindo supplier-invoices)
         Route::prefix('financial')->name('api.financial.')->group(function () {
             Route::get('/bank-accounts', [FinancialController::class, 'bankAccounts'])->name('bank-accounts');
             Route::post('/bank-accounts', [FinancialController::class, 'storeBankAccount'])->name('store-bank-account');
@@ -180,20 +167,17 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/client-balances', [FinancialController::class, 'clientBalances'])->name('client-balances');
             Route::get('/client-balances/{client}', [FinancialController::class, 'clientBalanceDetail'])->name('client-balance-detail');
             Route::post('/client-transactions', [FinancialController::class, 'recordClientTransaction'])->name('record-client-transaction');
-            Route::get('/supplier-invoices', [FinancialController::class, 'supplierInvoices'])->name('supplier-invoices');
-            Route::post('/supplier-invoices', [FinancialController::class, 'storeSupplierInvoice'])->name('store-supplier-invoice');
-            Route::get('/supplier-invoices/{invoice}', [FinancialController::class, 'showSupplierInvoice'])->name('show-supplier-invoice');
-            Route::put('/supplier-invoices/{invoice}', [FinancialController::class, 'updateSupplierInvoice'])->name('update-supplier-invoice');
-            Route::delete('/supplier-invoices/{invoice}', [FinancialController::class, 'deleteSupplierInvoice'])->name('delete-supplier-invoice');
-            Route::post('/supplier-invoices/{invoice}/mark-as-paid', [FinancialController::class, 'markInvoiceAsPaid'])->name('mark-invoice-paid');
-            Route::post('/supplier-invoices/{invoice}/upload-document', [FinancialController::class, 'uploadInvoiceDocument'])->name('upload-invoice-document');
-            Route::post('/supplier-invoices/{invoice}/upload-payment-proof', [FinancialController::class, 'uploadPaymentProof'])->name('upload-payment-proof');
-            Route::get('/supplier-invoices/{invoice}/download-document', [FinancialController::class, 'downloadInvoiceDocument'])->name('download-invoice-document');
             Route::get('/vat-rates', [FinancialController::class, 'vatRates'])->name('vat-rates');
             Route::post('/vat-rates', [FinancialController::class, 'storeVatRate'])->name('store-vat-rate');
             Route::put('/vat-rates/{vat}', [FinancialController::class, 'updateVatRate'])->name('update-vat-rate');
             Route::delete('/vat-rates/{vat}', [FinancialController::class, 'deleteVatRate'])->name('delete-vat-rate');
         });
+
+        // Supplier Invoices API (fora do prefixo financial)
+        Route::apiResource('supplier-invoices', SupplierInvoiceController::class);
+        Route::post('supplier-invoices/{id}/mark-as-paid', [SupplierInvoiceController::class, 'markAsPaid']);
+        Route::get('supplier-invoices/{id}/download-document', [SupplierInvoiceController::class, 'downloadDocument']);
+        Route::get('supplier-invoices/{id}/download-payment-proof', [SupplierInvoiceController::class, 'downloadPaymentProof']);
 
         // Calendar API
         Route::prefix('calendar')->name('api.calendar.')->group(function () {
@@ -273,6 +257,11 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/general', [SettingController::class, 'updateGeneral'])->name('update-general');
             Route::post('/sync', [SettingController::class, 'syncSettings'])->name('sync');
         });
+
+        // Supplier Orders API (para buscar encomendas do fornecedor)
+Route::prefix('supplier-orders')->name('api.supplier-orders.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\SupplierOrderController::class, 'index'])->name('index');
+});
     });
 
     // ==================== ÁREA DO CLIENTE ====================

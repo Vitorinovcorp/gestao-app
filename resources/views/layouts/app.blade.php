@@ -11,6 +11,7 @@
         .sidebar {
             transition: all 0.3s;
         }
+
         .sidebar .nav-item:hover {
             background-color: #374151;
         }
@@ -31,7 +32,7 @@
                 <a href="{{ url('/articles') }}" class="nav-item block px-4 py-2 hover:bg-gray-700">Artigos</a>
                 <a href="{{ url('/proposals') }}" class="nav-item block px-4 py-2 hover:bg-gray-700">Propostas</a>
                 <a href="{{ url('/orders') }}" class="nav-item block px-4 py-2 hover:bg-gray-700">Encomendas</a>
-                <a href="{{ url('/supplier-orders') }}" class="nav-item block px-4 py-2 hover:bg-gray-700">Encomendas Fornecedores</a>
+                <a href="{{ url('/supplier-invoices') }}" class="nav-item block px-4 py-2 hover:bg-gray-700">Faturas Fornecedor</a>
                 <a href="{{ url('/calendar') }}" class="nav-item block px-4 py-2 hover:bg-gray-700">Calendário</a>
                 <a href="{{ url('/archive') }}" class="nav-item block px-4 py-2 hover:bg-gray-700">Arquivo Digital</a>
                 <a href="{{ url('/users') }}" class="nav-item block px-4 py-2 hover:bg-gray-700">Utilizadores</a>
