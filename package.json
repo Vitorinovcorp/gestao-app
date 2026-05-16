@@ -18,9 +18,12 @@
         "@fullcalendar/interaction": "^6.1.20",
         "@fullcalendar/timegrid": "^6.1.20",
         "@fullcalendar/vue3": "^6.1.20",
+        "@tanstack/vue-table": "^8.21.3",
+        "@vee-validate/zod": "^4.15.1",
         "@vitejs/plugin-vue": "^6.0.6",
         "fullcalendar": "^6.1.20",
         "lucide-vue-next": "^1.0.0",
-        "vue": "^3.5.34"
+        "vue": "^3.5.34",
+        "zod": "^3.25.76"
     }
 }

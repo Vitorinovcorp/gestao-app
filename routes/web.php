@@ -219,17 +219,17 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{user}/send-welcome-email', [UserController::class, 'sendWelcomeEmail'])->name('send-welcome-email');
         });
 
-        // Permissions API
+        // ==================== PERMISSIONS API (NOVAS ROTAS) ====================
         Route::prefix('permissions')->name('api.permissions.')->group(function () {
-            Route::get('/', [PermissionController::class, 'index'])->name('index');
-            Route::post('/groups', [PermissionController::class, 'storeGroup'])->name('store-group');
-            Route::get('/groups/{group}', [PermissionController::class, 'showGroup'])->name('show-group');
-            Route::put('/groups/{group}', [PermissionController::class, 'updateGroup'])->name('update-group');
-            Route::delete('/groups/{group}', [PermissionController::class, 'deleteGroup'])->name('delete-group');
-            Route::post('/groups/{group}/sync-permissions', [PermissionController::class, 'syncPermissions'])->name('sync-permissions');
-            Route::get('/all-permissions', [PermissionController::class, 'allPermissions'])->name('all-permissions');
-            Route::post('/check-permission', [PermissionController::class, 'checkPermission'])->name('check-permission');
+            Route::get('/', [PermissionController::class, 'getRoles'])->name('get-roles');
+            Route::post('/', [PermissionController::class, 'store'])->name('store');
+            Route::get('/{role}', [PermissionController::class, 'show'])->name('show');
+            Route::put('/{role}', [PermissionController::class, 'update'])->name('update');
+            Route::delete('/{role}', [PermissionController::class, 'destroy'])->name('destroy');
         });
+
+        // Lista de todas as permissões disponíveis
+        Route::get('/permissions-list', [PermissionController::class, 'permissionsList'])->name('permissions.list');
 
         // Logs API
         Route::prefix('logs')->name('api.logs.')->group(function () {
@@ -259,9 +259,9 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Supplier Orders API (para buscar encomendas do fornecedor)
-Route::prefix('supplier-orders')->name('api.supplier-orders.')->group(function () {
-    Route::get('/', [\App\Http\Controllers\SupplierOrderController::class, 'index'])->name('index');
-});
+        Route::prefix('supplier-orders')->name('api.supplier-orders.')->group(function () {
+            Route::get('/', [SupplierOrderController::class, 'index'])->name('index');
+        });
     });
 
     // ==================== ÁREA DO CLIENTE ====================
@@ -275,4 +275,11 @@ Route::prefix('supplier-orders')->name('api.supplier-orders.')->group(function (
         Route::get('/perfil', [ClienteController::class, 'perfil'])->name('perfil');
         Route::put('/perfil', [ClienteController::class, 'atualizarPerfil'])->name('perfil.update');
     });
+
+    Route::get('/user/permissions', function () {
+        $user = auth()->user();
+        return response()->json([
+            'permissions' => $user->getAllPermissions()->pluck('name')
+        ]);
+    })->name('user.permissions');
 });
