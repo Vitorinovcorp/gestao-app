@@ -66,8 +66,12 @@ Route::middleware(['auth'])->group(function () {
     Route::view('/archive', 'archive.index')->name('archive.index');
     Route::view('/users', 'users.index')->name('users.index');
     Route::view('/permissions', 'permissions.index')->name('permissions.index');
-    Route::view('/logs', 'logs.index')->name('logs.index');
+    Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
     Route::view('/settings', 'settings.index')->name('settings.index');
+
+    // Rotas de Logs (para ações específicas)
+    Route::get('/logs/export', [LogController::class, 'export'])->name('logs.export');
+    Route::delete('/logs/clear-old', [LogController::class, 'clearOldLogs'])->name('logs.clear-old');
 
     // VIEWS com parâmetros
     Route::get('/proposals/{id}', function ($id) {

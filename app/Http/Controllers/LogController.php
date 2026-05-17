@@ -4,153 +4,110 @@ namespace App\Http\Controllers;
 
 use Spatie\Activitylog\Models\Activity;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class LogController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('permission:view logs');
-    }
-    
     public function index(Request $request)
     {
-        $query = Activity::with('causer')
-                         ->orderBy('created_at', 'desc');
+        $query = Activity::with('causer');
         
-        if ($request->has('date_from')) {
-            $query->whereDate('created_at', '>=', $request->date_from);
+        // Filtros
+        if ($request->filled('menu')) {
+            $query->where('log_name', $request->menu);
         }
         
-        if ($request->has('date_to')) {
-            $query->whereDate('created_at', '<=', $request->date_to);
-        }
-        
-        if ($request->has('user_id')) {
+        if ($request->filled('user_id')) {
             $query->where('causer_id', $request->user_id);
         }
         
-        if ($request->has('log_name')) {
-            $query->where('log_name', $request->log_name);
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
         }
         
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('description', 'like', "%{$search}%")
-                  ->orWhere('subject_type', 'like', "%{$search}%")
-                  ->orWhere('properties', 'like', "%{$search}%");
-            });
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
         }
         
-        $logs = $query->paginate($request->get('per_page', 50));
+        $logs = $query->latest()->paginate(50);
         
-        // Format logs for display
-        $logs->getCollection()->transform(function ($log) {
+        // Transformar os dados
+        $logs->getCollection()->transform(function ($activity) {
+            $properties = [];
+            if ($activity->properties) {
+                $properties = is_string($activity->properties) 
+                    ? json_decode($activity->properties, true) 
+                    : (array) $activity->properties;
+            }
+            
             return [
-                'id' => $log->id,
-                'date' => $log->created_at->format('Y-m-d'),
-                'time' => $log->created_at->format('H:i:s'),
-                'user' => $log->causer ? $log->causer->name : 'Sistema',
-                'user_email' => $log->causer ? $log->causer->email : null,
-                'menu' => $log->log_name ?? 'Geral',
-                'action' => $log->description,
-                'subject_type' => class_basename($log->subject_type),
-                'subject_id' => $log->subject_id,
-                'properties' => $log->properties,
-                'device' => $this->getDeviceInfo($log),
-                'ip' => $log->properties['ip'] ?? null
+                'id' => $activity->id,
+                'data' => $activity->created_at->format('d/m/Y'),
+                'hora' => $activity->created_at->format('H:i:s'),
+                'utilizador' => $activity->causer?->name ?? 'Sistema',
+                'menu' => $activity->log_name ?? 'Geral',
+                'acao' => $activity->description,
+                'dispositivo' => $properties['user_agent'] ?? $properties['device'] ?? 'Desconhecido',
+                'ip' => $properties['ip'] ?? 'N/A',
             ];
         });
         
-        return response()->json($logs);
-    }
-    
-    public function filters()
-    {
-        $users = DB::table('users')->select('id', 'name')->orderBy('name')->get();
-        $logNames = Activity::select('log_name')->distinct()->whereNotNull('log_name')->pluck('log_name');
+        // Dados para filtros
+        $menus = Activity::select('log_name')->whereNotNull('log_name')->distinct()->pluck('log_name');
+        $users = \App\Models\User::select('id', 'name')->orderBy('name')->get();
         
-        return response()->json([
-            'users' => $users,
-            'log_names' => $logNames
-        ]);
+        return view('logs.index', compact('logs', 'menus', 'users'));
     }
     
     public function export(Request $request)
     {
-        $query = Activity::with('causer')->orderBy('created_at', 'desc');
+        $query = Activity::with('causer');
         
-        if ($request->has('date_from')) {
+        if ($request->filled('date_from')) {
             $query->whereDate('created_at', '>=', $request->date_from);
         }
         
-        if ($request->has('date_to')) {
+        if ($request->filled('date_to')) {
             $query->whereDate('created_at', '<=', $request->date_to);
         }
         
-        $logs = $query->get();
+        $logs = $query->latest()->get();
         
-        $csvData = [];
-        $csvData[] = ['Data', 'Hora', 'Utilizador', 'Menu', 'Ação', 'IP', 'Detalhes'];
+        $filename = 'logs_' . date('Y-m-d_His') . '.csv';
+        $handle = fopen('php://temp', 'w');
+        
+        fputcsv($handle, ['Data', 'Hora', 'Utilizador', 'Menu', 'Acção', 'Dispositivo', 'IP']);
         
         foreach ($logs as $log) {
-            $csvData[] = [
-                $log->created_at->format('Y-m-d'),
+            $properties = is_string($log->properties) ? json_decode($log->properties, true) : [];
+            
+            fputcsv($handle, [
+                $log->created_at->format('d/m/Y'),
                 $log->created_at->format('H:i:s'),
-                $log->causer ? $log->causer->name : 'Sistema',
+                $log->causer?->name ?? 'Sistema',
                 $log->log_name ?? 'Geral',
                 $log->description,
-                $log->properties['ip'] ?? 'N/A',
-                json_encode($log->properties)
-            ];
+                $properties['user_agent'] ?? $properties['device'] ?? 'Desconhecido',
+                $properties['ip'] ?? 'N/A',
+            ]);
         }
         
-        $filename = "logs_" . now()->format('Y-m-d_His') . ".csv";
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
         
-        $callback = function() use ($csvData) {
-            $file = fopen('php://output', 'w');
-            foreach ($csvData as $row) {
-                fputcsv($file, $row, ';');
-            }
-            fclose($file);
-        };
-        
-        return response()->stream($callback, 200, [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ]);
+        return response($csv, 200)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
     
     public function clearOldLogs(Request $request)
     {
-        $this->middleware('permission:delete logs');
-        
-        $days = $request->get('days', 90);
-        
+        $days = $request->input('days', 90);
         $deleted = Activity::where('created_at', '<', now()->subDays($days))->delete();
         
         return response()->json([
-            'message' => "{$deleted} logs antigos foram eliminados"
+            'success' => true,
+            'message' => "{$deleted} logs mais antigos que {$days} dias foram removidos."
         ]);
-    }
-    
-    private function getDeviceInfo($log)
-    {
-        $properties = $log->properties;
-        
-        if (isset($properties['user_agent'])) {
-            $userAgent = $properties['user_agent'];
-            
-            if (str_contains($userAgent, 'Mobile')) {
-                return 'Mobile';
-            } elseif (str_contains($userAgent, 'Tablet')) {
-                return 'Tablet';
-            } elseif (str_contains($userAgent, 'Windows') || str_contains($userAgent, 'Mac')) {
-                return 'Desktop';
-            }
-        }
-        
-        return 'Desconhecido';
     }
 }
