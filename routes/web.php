@@ -16,7 +16,8 @@ use App\Http\Controllers\{
     LogController,
     SettingController,
     ArchiveController,
-    ClienteController
+    ClienteController,
+    CompanyController
 };
 
 use Illuminate\Support\Facades\Route;
@@ -88,6 +89,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/supplier-invoices', function () {
         return view('supplier-invoices');
     })->name('supplier-invoices.index');
+
+    // ==================== COMPANY SETTINGS ====================
+    Route::prefix('company')->name('company.')->group(function () {
+        Route::get('/', [CompanyController::class, 'index'])->name('index');
+        Route::put('/update', [CompanyController::class, 'update'])->name('update');
+        Route::post('/upload-logo', [CompanyController::class, 'uploadLogo'])->name('upload-logo');
+        Route::delete('/delete-logo', [CompanyController::class, 'deleteLogo'])->name('delete-logo');
+    });
 
     // ==================== ROTAS DE API (DEVEM VIR DEPOIS) ====================
     Route::prefix('api')->group(function () {

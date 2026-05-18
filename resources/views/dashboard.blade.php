@@ -35,7 +35,9 @@
             document.getElementById('totalClients').textContent = data.clients || 0;
             document.getElementById('totalProposals').textContent = data.proposals || 0;
             document.getElementById('totalOrders').textContent = data.orders || 0;
-            document.getElementById('totalRevenue').textContent = (data.revenue || 0) + '€';
+            
+            let formattedRevenue = (data.revenue || 0).toFixed(2);
+            document.getElementById('totalRevenue').textContent = formattedRevenue + '€';
         });
 </script>
 @endsection
