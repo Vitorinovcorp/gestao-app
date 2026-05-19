@@ -6,10 +6,10 @@
         <h1 class="text-2xl font-bold">Logs do Sistema</h1>
         <div class="flex gap-2">
             <button type="button" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-sm" onclick="confirmClearLogs()">
-                <i class="fas fa-trash-alt"></i> Limpar Logs Antigos
+                 Limpar Logs 
             </button>
             <a href="{{ route('logs.export') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-sm">
-                <i class="fas fa-download"></i> Exportar CSV
+                 Exportar CSV
             </a>
         </div>
     </div>
@@ -57,10 +57,10 @@
             
             <div class="flex items-end gap-2">
                 <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    <i class="fas fa-search"></i> Filtrar
+                     Filtrar
                 </button>
                 <a href="{{ route('logs.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                    <i class="fas fa-undo"></i> Limpar
+                   Limpar
                 </a>
             </div>
         </form>
