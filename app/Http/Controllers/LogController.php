@@ -11,7 +11,6 @@ class LogController extends Controller
     {
         $query = Activity::with('causer');
 
-        // Filtros
         if ($request->filled('menu')) {
             $query->where('log_name', $request->menu);
         }
@@ -30,7 +29,6 @@ class LogController extends Controller
 
         $logs = $query->latest()->paginate(50);
 
-        // Transformar os dados
         $logs->getCollection()->transform(function ($activity) {
             $properties = [];
             if ($activity->properties) {
@@ -51,7 +49,6 @@ class LogController extends Controller
             ];
         });
 
-        // Dados para filtros
         $menus = Activity::select('log_name')->whereNotNull('log_name')->distinct()->pluck('log_name');
         $users = \App\Models\User::select('id', 'name')->orderBy('name')->get();
 

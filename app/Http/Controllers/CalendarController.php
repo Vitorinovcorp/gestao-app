@@ -5,10 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CalendarEvent;
 use App\Models\CalendarType;
 use App\Models\CalendarAction;
-use App\Models\Entity;
-use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class CalendarController extends Controller
 {

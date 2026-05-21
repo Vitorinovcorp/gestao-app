@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\SupplierInvoice;
-use App\Models\Entity;
-use App\Models\SupplierOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -179,7 +177,6 @@ class SupplierInvoiceController extends Controller
             
             $invoice->save();
             
-            // Enviar email se solicitado
             $emailSent = false;
             if ($request->send_email && $invoice->supplier->email) {
                 Mail::to($invoice->supplier->email)->send(new PaymentProofMail($invoice));

@@ -69,14 +69,14 @@ class TenantController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'primary_color' => 'nullable|string|max:7',
-            'settings' => 'nullable|array',
+            'is_active' => 'nullable|boolean',
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $tenant->update($request->only(['name', 'primary_color', 'settings']));
+        $tenant->update($request->only(['name', 'primary_color', 'is_active']));
 
         return redirect()->back()->with('success', 'Configurações do tenant atualizadas!');
     }

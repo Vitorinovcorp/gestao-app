@@ -26,7 +26,6 @@ class SettingController extends Controller
         ]);
     }
     
-    // ==================== PAÍSES ====================
     public function countries()
     {
         $countries = Country::orderBy('name')->get();
@@ -71,7 +70,6 @@ class SettingController extends Controller
         return response()->json(['message' => 'País eliminado com sucesso']);
     }
     
-    // ==================== FUNÇÕES DE CONTACTO ====================
     public function contactRoles()
     {
         $roles = ContactRole::orderBy('name')->get();
@@ -116,7 +114,6 @@ class SettingController extends Controller
         return response()->json(['message' => 'Função eliminada com sucesso']);
     }
     
-    // ==================== CONFIGURAÇÕES DA EMPRESA ====================
     public function companySettings()
     {
         $settings = CompanySetting::first();
@@ -188,7 +185,6 @@ class SettingController extends Controller
         return response()->json(['message' => 'Logo removido com sucesso']);
     }
     
-    // ==================== CONFIGURAÇÕES GERAIS ====================
     public function generalSettings()
     {
         return response()->json([
@@ -206,7 +202,6 @@ class SettingController extends Controller
             'timezone' => 'required|string'
         ]);
         
-        // Atualizar .env
         $this->updateEnvFile($validated);
         
         return response()->json(['message' => 'Configurações atualizadas com sucesso']);

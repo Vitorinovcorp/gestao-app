@@ -27,7 +27,6 @@ class SupplierOrderController extends Controller
     
     public function store(Request $request)
     {
-        // Implementar depois
         return response()->json(['message' => 'Em desenvolvimento']);
     }
     

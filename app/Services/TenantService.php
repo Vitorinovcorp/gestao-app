@@ -18,7 +18,6 @@ class TenantService
         Session::put('tenant_name', $tenant->name);
         Session::put('tenant_slug', $tenant->slug);
         
-        DB::statement("SET app.current_tenant = ?", [$tenant->id]);
     }
 
     public function getActiveTenant(): ?Tenant
@@ -104,6 +103,6 @@ class TenantService
         Session::forget(self::SESSION_KEY);
         Session::forget('tenant_name');
         Session::forget('tenant_slug');
-        DB::statement("SET app.current_tenant = NULL");
+        
     }
 }

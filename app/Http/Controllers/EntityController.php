@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Entity;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class EntityController extends Controller
@@ -81,7 +80,6 @@ class EntityController extends Controller
                 'is_active' => 'boolean'
             ]);
             
-            // Generate sequential number
             $lastEntity = Entity::orderBy('id', 'desc')->first();
             $number = $lastEntity ? intval($lastEntity->number) + 1 : 1;
             $validated['number'] = str_pad($number, 6, '0', STR_PAD_LEFT);

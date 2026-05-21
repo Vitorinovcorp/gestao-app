@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderLine;
-use App\Models\Proposal;
-use App\Models\Entity;
 use App\Models\Article;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -77,7 +75,6 @@ class OrderController extends Controller
 
                 $totalValue += $lineTotal;
 
-                // Atualizar stock
                 $article->decrement('stock_current', $quantity);
             }
 
@@ -117,7 +114,6 @@ class OrderController extends Controller
 
             DB::beginTransaction();
 
-            // Restaurar stock antigo
             foreach ($order->lines as $line) {
                 $article = Article::find($line->article_id);
                 if ($article) {
@@ -125,7 +121,6 @@ class OrderController extends Controller
                 }
             }
 
-            // Deletar linhas antigas
             OrderLine::where('order_id', $id)->delete();
 
             $totalValue = 0;
@@ -139,7 +134,6 @@ class OrderController extends Controller
 
                 $totalValue += $lineData['quantity'] * $lineData['unit_price'];
 
-                // Atualizar novo stock
                 $article = Article::find($lineData['article_id']);
                 if ($article) {
                     $article->decrement('stock_current', $lineData['quantity']);
@@ -178,7 +172,6 @@ class OrderController extends Controller
                 return response()->json(['message' => 'Não é possível eliminar uma encomenda já confirmada'], 422);
             }
 
-            // Restaurar stock
             foreach ($order->lines as $line) {
                 $article = Article::find($line->article_id);
                 if ($article) {
@@ -222,7 +215,6 @@ class OrderController extends Controller
 
     public function convertToSupplierOrders($id)
     {
-        // TODO: Implementar conversão para encomendas de fornecedor
         return response()->json([
             'success' => true,
             'message' => 'Funcionalidade em desenvolvimento'
@@ -258,13 +250,11 @@ class OrderController extends Controller
                 'unit_price' => $request->unit_price
             ]);
 
-            // Atualizar stock
             $article = Article::find($request->article_id);
             if ($article) {
                 $article->decrement('stock_current', $request->quantity);
             }
 
-            // Recalcular total
             $totalValue = $order->lines()->sum(DB::raw('quantity * unit_price'));
             $order->total_value = $totalValue;
             $order->save();

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Proposal;
 use App\Models\ProposalLine;
-use App\Models\Entity;
 use App\Models\Article;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -115,12 +114,10 @@ class ProposalController extends Controller
                 'notes' => $request->notes
             ]);
             
-            // Deletar linhas antigas
             ProposalLine::where('proposal_id', $id)->delete();
             
             $totalValue = 0;
             foreach ($request->lines as $lineData) {
-                // Buscar o artigo para pegar a taxa de IVA
                 $article = Article::find($lineData['article_id']);
                 $vatRate = $article->vat ? $article->vat->rate : 23;
                 
@@ -209,7 +206,6 @@ class ProposalController extends Controller
                 return response()->json(['message' => 'A proposta precisa estar fechada'], 422);
             }
             
-            // Criar encomenda a partir da proposta
             $year = date('Y');
             $lastOrder = \App\Models\Order::whereYear('created_at', $year)
                                           ->orderBy('id', 'desc')

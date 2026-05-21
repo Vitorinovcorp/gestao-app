@@ -30,30 +30,32 @@
         @click.away="open = false"
         class="tenant-dropdown absolute top-full right-0 mt-2 w-64 bg-white rounded-lg shadow-xl z-50 border border-gray-100 overflow-hidden"
         style="display: none;"
-        x-transition
     >
         <div class="p-2">
             <div class="text-xs text-gray-500 px-2 py-1">Seus Tenants</div>
             
             @foreach($userTenants as $tenant)
-                <a 
-                    href="{{ route('tenants.switch', $tenant->id) }}"
-                    class="tenant-option flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition {{ $currentTenant?->id === $tenant->id ? 'active' : '' }}"
-                >
-                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white"
-                         style="background-color: {{ $tenant->primary_color ?? '#6D5BD0' }}">
-                        {{ substr($tenant->name, 0, 1) }}
-                    </div>
-                    <div class="flex-1">
-                        <div class="text-sm font-medium text-gray-800">{{ $tenant->name }}</div>
-                        <div class="text-xs text-gray-500">
-                            {{ $tenant->isOwner(auth()->user()) ? 'Proprietário' : 'Membro' }}
+                <!-- FORMA CORRETA: Formulário POST -->
+                <form method="POST" action="{{ route('tenants.switch', $tenant->id) }}" class="block">
+                    @csrf
+                    <button type="submit" 
+                            class="tenant-option w-full text-left flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition {{ $currentTenant?->id === $tenant->id ? 'bg-indigo-50' : '' }}"
+                    >
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                             style="background-color: {{ $tenant->primary_color ?? '#6D5BD0' }}">
+                            {{ substr($tenant->name, 0, 1) }}
                         </div>
-                    </div>
-                    @if($currentTenant?->id === $tenant->id)
-                        <i class="fa-solid fa-check text-indigo-600"></i>
-                    @endif
-                </a>
+                        <div class="flex-1">
+                            <div class="text-sm font-medium text-gray-800">{{ $tenant->name }}</div>
+                            <div class="text-xs text-gray-500">
+                                {{ $tenant->isOwner(auth()->user()) ? 'Proprietário' : 'Membro' }}
+                            </div>
+                        </div>
+                        @if($currentTenant?->id === $tenant->id)
+                            <i class="fa-solid fa-check text-indigo-600"></i>
+                        @endif
+                    </button>
+                </form>
             @endforeach
 
             <div class="border-t border-gray-100 my-1"></div>

@@ -23,7 +23,6 @@ use App\Http\Controllers\{
 
 use Illuminate\Support\Facades\Route;
 
-// ==================== ROTAS PÚBLICAS ====================
 Route::get('/', function () {
     return redirect('/dashboard');
 });
@@ -50,14 +49,11 @@ Route::get('/vat-rates', function () {
     return App\Models\VatRate::all();
 });
 
-// ==================== ROTAS PROTEGIDAS ====================
 Route::middleware(['auth'])->group(function () {
 
-    // ==================== DASHBOARD ====================
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/api/dashboard/stats', [DashboardController::class, 'stats'])->name('dashboard.stats');
 
-    // ==================== VIEWS (DEVEM VIR PRIMEIRO) ====================
     Route::view('/articles', 'articles.index')->name('articles.index');
     Route::view('/entities', 'entities.index')->name('entities.index');
     Route::view('/contacts', 'contacts.index')->name('contacts.index');
@@ -71,14 +67,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
     Route::view('/settings', 'settings.index')->name('settings.index');
 
-    // ==================== ROTAS DE LOGS (ATUALIZADAS) ====================
     Route::prefix('logs')->name('logs.')->group(function () {
         Route::get('/export', [LogController::class, 'export'])->name('export');
         Route::delete('/clear-old', [LogController::class, 'clearOldLogs'])->name('clear-old');
-        Route::post('/clear-old', [LogController::class, 'clearOldLogs'])->name('clear-old-post'); // Alternativa POST
+        Route::post('/clear-old', [LogController::class, 'clearOldLogs'])->name('clear-old-post');
     });
 
-    // VIEWS com parâmetros
     Route::get('/proposals/{id}', function ($id) {
         $proposta = App\Models\Proposal::with(['client', 'createdBy', 'lines.article'])->findOrFail($id);
         return view('proposals.show', compact('proposta'));
@@ -89,12 +83,10 @@ Route::middleware(['auth'])->group(function () {
         return view('orders.show', compact('encomenda'));
     })->name('orders.show');
 
-    // Faturas de Fornecedor - VIEW
     Route::get('/supplier-invoices', function () {
         return view('supplier-invoices');
     })->name('supplier-invoices.index');
 
-    // ==================== COMPANY SETTINGS ====================
     Route::prefix('company')->name('company.')->group(function () {
         Route::get('/', [CompanyController::class, 'index'])->name('index');
         Route::put('/update', [CompanyController::class, 'update'])->name('update');
@@ -102,10 +94,8 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/delete-logo', [CompanyController::class, 'deleteLogo'])->name('delete-logo');
     });
 
-    // ==================== ROTAS DE API (DEVEM VIR DEPOIS) ====================
     Route::prefix('api')->group(function () {
 
-        // Entities API
         Route::prefix('entities')->name('api.entities.')->group(function () {
             Route::get('/', [EntityController::class, 'index'])->name('index');
             Route::get('/clients', [EntityController::class, 'clients'])->name('clients');
@@ -119,7 +109,6 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/vies-check', [EntityController::class, 'viesCheck'])->name('vies-check');
         });
 
-        // Contacts API
         Route::prefix('contacts')->name('api.contacts.')->group(function () {
             Route::get('/', [ContactController::class, 'index'])->name('index');
             Route::get('/by-entity/{entity}', [ContactController::class, 'byEntity'])->name('by-entity');
@@ -130,7 +119,6 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{contact}/toggle-status', [ContactController::class, 'toggleStatus'])->name('toggle-status');
         });
 
-        // Articles API
         Route::prefix('articles')->name('api.articles.')->group(function () {
             Route::get('/', [ArticleController::class, 'index'])->name('index');
             Route::get('/search', [ArticleController::class, 'search'])->name('search');
@@ -143,7 +131,6 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{article}/toggle-status', [ArticleController::class, 'toggleStatus'])->name('toggle-status');
         });
 
-        // Proposals API
         Route::prefix('proposals')->name('api.proposals.')->group(function () {
             Route::get('/', [ProposalController::class, 'index'])->name('index');
             Route::post('/', [ProposalController::class, 'store'])->name('store');
@@ -159,7 +146,6 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/generate-number', [ProposalController::class, 'generateNumber'])->name('generate-number');
         });
 
-        // Orders API
         Route::prefix('orders')->name('api.orders.')->group(function () {
             Route::get('/', [OrderController::class, 'index'])->name('index');
             Route::post('/', [OrderController::class, 'store'])->name('store');
@@ -175,7 +161,6 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/generate-number', [OrderController::class, 'generateNumber'])->name('generate-number');
         });
 
-        // Financial API (incluindo supplier-invoices)
         Route::prefix('financial')->name('api.financial.')->group(function () {
             Route::get('/bank-accounts', [FinancialController::class, 'bankAccounts'])->name('bank-accounts');
             Route::post('/bank-accounts', [FinancialController::class, 'storeBankAccount'])->name('store-bank-account');
@@ -190,13 +175,11 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/vat-rates/{vat}', [FinancialController::class, 'deleteVatRate'])->name('delete-vat-rate');
         });
 
-        // Supplier Invoices API (fora do prefixo financial)
         Route::apiResource('supplier-invoices', SupplierInvoiceController::class);
         Route::post('supplier-invoices/{id}/mark-as-paid', [SupplierInvoiceController::class, 'markAsPaid']);
         Route::get('supplier-invoices/{id}/download-document', [SupplierInvoiceController::class, 'downloadDocument']);
         Route::get('supplier-invoices/{id}/download-payment-proof', [SupplierInvoiceController::class, 'downloadPaymentProof']);
 
-        // Calendar API
         Route::prefix('calendar')->name('api.calendar.')->group(function () {
             Route::get('/events', [CalendarController::class, 'events'])->name('events');
             Route::post('/events', [CalendarController::class, 'store'])->name('store');
@@ -213,7 +196,6 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/actions/{action}', [CalendarController::class, 'deleteAction'])->name('delete-action');
         });
 
-        // Archive API
         Route::prefix('archive')->name('api.archive.')->group(function () {
             Route::get('/documents', [ArchiveController::class, 'index'])->name('index');
             Route::post('/upload', [ArchiveController::class, 'upload'])->name('upload');
@@ -224,7 +206,6 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/search', [ArchiveController::class, 'search'])->name('search');
         });
 
-        // Users API
         Route::prefix('users')->name('api.users.')->group(function () {
             Route::get('/', [UserController::class, 'index'])->name('index');
             Route::post('/', [UserController::class, 'store'])->name('store');
@@ -236,7 +217,6 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{user}/send-welcome-email', [UserController::class, 'sendWelcomeEmail'])->name('send-welcome-email');
         });
 
-        // ==================== PERMISSIONS API ====================
         Route::prefix('permissions')->name('api.permissions.')->group(function () {
             Route::get('/', [PermissionController::class, 'getRoles'])->name('get-roles');
             Route::post('/', [PermissionController::class, 'store'])->name('store');
@@ -245,10 +225,8 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/{role}', [PermissionController::class, 'destroy'])->name('destroy');
         });
 
-        // Lista de todas as permissões disponíveis
         Route::get('/permissions-list', [PermissionController::class, 'permissionsList'])->name('permissions.list');
 
-        // ==================== LOGS API (ATUALIZADA) ====================
         Route::prefix('logs')->name('api.logs.')->group(function () {
             Route::get('/', [LogController::class, 'index'])->name('index');
             Route::get('/export', [LogController::class, 'export'])->name('export');
@@ -257,7 +235,6 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/clear', [LogController::class, 'clearOldLogs'])->name('clear-old-post');
         });
 
-        // Settings API
         Route::prefix('settings')->name('api.settings.')->group(function () {
             Route::get('/countries', [SettingController::class, 'countries'])->name('countries');
             Route::post('/countries', [SettingController::class, 'storeCountry'])->name('store-country');
@@ -276,13 +253,11 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/sync', [SettingController::class, 'syncSettings'])->name('sync');
         });
 
-        // Supplier Orders API
         Route::prefix('supplier-orders')->name('api.supplier-orders.')->group(function () {
             Route::get('/', [SupplierOrderController::class, 'index'])->name('index');
         });
     });
 
-    // ==================== ÁREA DO CLIENTE ====================
     Route::prefix('cliente')->name('cliente.')->group(function () {
         Route::get('/dashboard', [ClienteController::class, 'dashboard'])->name('dashboard');
         Route::get('/propostas', [ClienteController::class, 'propostas'])->name('propostas');
@@ -301,12 +276,12 @@ Route::middleware(['auth'])->group(function () {
         ]);
     })->name('user.permissions');
 
-    Route::prefix('tenants')->name('tenants.')->middleware(['auth'])->group(function () {
-    Route::get('/', [TenantController::class, 'index'])->name('index');
-    Route::get('/create', [TenantController::class, 'create'])->name('create');
-    Route::post('/', [TenantController::class, 'store'])->name('store');
-    Route::post('/switch/{id}', [TenantController::class, 'switch'])->name('switch');
-    Route::get('/settings', [TenantController::class, 'settings'])->name('settings');
-    Route::put('/settings', [TenantController::class, 'updateSettings'])->name('update-settings');
-});
+    Route::prefix('tenants')->name('tenants.')->group(function () {
+        Route::get('/', [TenantController::class, 'index'])->name('index');
+        Route::get('/create', [TenantController::class, 'create'])->name('create');
+        Route::post('/', [TenantController::class, 'store'])->name('store');
+        Route::match(['GET', 'POST'], '/switch/{id}', [TenantController::class, 'switch'])->name('switch');
+        Route::get('/settings', [TenantController::class, 'settings'])->name('settings');
+        Route::put('/settings', [TenantController::class, 'updateSettings'])->name('update-settings');
+    });
 });

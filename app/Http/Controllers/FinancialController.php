@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\SupplierInvoice;
-use App\Models\Entity;
-use App\Models\SupplierOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -20,7 +18,6 @@ class FinancialController extends Controller
         $this->middleware('permission:delete financial')->only(['deleteSupplierInvoice', 'deleteBankAccount']);
     }
     
-    // Supplier Invoices
     public function supplierInvoices(Request $request)
     {
         $query = SupplierInvoice::with(['supplier', 'supplierOrder']);
@@ -150,7 +147,6 @@ class FinancialController extends Controller
             
             $invoice->save();
             
-            // Send email if requested
             if ($request->get('send_email', false) && $invoice->supplier->email) {
                 Mail::to($invoice->supplier->email)
                     ->send(new PaymentProofMail($invoice));
