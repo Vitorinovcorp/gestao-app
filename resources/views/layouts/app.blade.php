@@ -7,19 +7,12 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Sistema de Gestão')</title>
 
-
-    <!-- Favicon -->
     <link rel="icon" type="image/png" href="{{ asset('images/inovcorp-logo.png') }}">
     <link rel="shortcut icon" href="{{ asset('images/inovcorp-logo.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/inovcorp-logo.png') }}">
 
-
-    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Icons -->
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
         * {
@@ -45,7 +38,6 @@
             overflow: hidden;
         }
 
-        /* Esconder scrollbar completamente */
         .sidebar-nav {
             flex: 1;
             overflow-y: auto;
@@ -92,7 +84,6 @@
             padding: 1.5rem;
         }
 
-        /* Compactar espaços */
         .logo-area {
             padding: 1rem 1.25rem !important;
         }
@@ -115,6 +106,33 @@
             height: 32px;
             object-fit: contain;
         }
+
+        /* Estilos para o Tenant Switcher */
+        .tenant-switcher-btn {
+            background: rgba(109, 91, 208, 0.1);
+            border: 1px solid rgba(109, 91, 208, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .tenant-switcher-btn:hover {
+            background: rgba(109, 91, 208, 0.2);
+        }
+
+        .tenant-dropdown {
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .tenant-option {
+            transition: all 0.2s ease;
+        }
+
+        .tenant-option:hover {
+            background: #f3f4f6;
+        }
+
+        .tenant-option.active {
+            background: rgba(109, 91, 208, 0.1);
+        }
     </style>
 </head>
 
@@ -132,80 +150,67 @@
         <!-- Menu -->
         <div class="sidebar-nav px-3">
             <div class="space-y-1 menu-space">
-                <a href="{{ url('/dashboard') }}"
-                    class="nav-item flex items-center gap-3">
+                <a href="{{ url('/dashboard') }}" class="nav-item flex items-center gap-3">
                     <i class="fa-solid fa-gauge"></i>
                     Dashboard
                 </a>
 
-                <a href="{{ url('/entities') }}"
-                    class="nav-item flex items-center gap-3">
+                <a href="{{ url('/entities') }}" class="nav-item flex items-center gap-3">
                     <i class="fa-solid fa-building"></i>
                     Entidades
                 </a>
 
-                <a href="{{ url('/contacts') }}"
-                    class="nav-item flex items-center gap-3">
+                <a href="{{ url('/contacts') }}" class="nav-item flex items-center gap-3">
                     <i class="fa-solid fa-address-book"></i>
                     Contactos
                 </a>
 
-                <a href="{{ url('/articles') }}"
-                    class="nav-item flex items-center gap-3">
+                <a href="{{ url('/articles') }}" class="nav-item flex items-center gap-3">
                     <i class="fa-solid fa-box"></i>
                     Artigos
                 </a>
 
-                <a href="{{ url('/proposals') }}"
-                    class="nav-item flex items-center gap-3">
+                <a href="{{ url('/proposals') }}" class="nav-item flex items-center gap-3">
                     <i class="fa-solid fa-file-lines"></i>
                     Propostas
                 </a>
 
-                <a href="{{ url('/orders') }}"
-                    class="nav-item flex items-center gap-3">
+                <a href="{{ url('/orders') }}" class="nav-item flex items-center gap-3">
                     <i class="fa-solid fa-cart-shopping"></i>
                     Encomendas
                 </a>
 
-                <a href="{{ route('supplier-invoices.index') }}"
-                    class="nav-item flex items-center gap-3">
+                <a href="{{ route('supplier-invoices.index') }}" class="nav-item flex items-center gap-3">
                     <i class="fa-solid fa-file-invoice-dollar"></i>
                     Faturas Fornecedores
                 </a>
 
-                <a href="{{ url('/calendar') }}"
-                    class="nav-item flex items-center gap-3">
+                <a href="{{ url('/calendar') }}" class="nav-item flex items-center gap-3">
                     <i class="fa-solid fa-calendar"></i>
                     Calendário
                 </a>
 
-                <a href="{{ url('/logs') }}"
-                    class="nav-item flex items-center gap-3">
+                <a href="{{ url('/logs') }}" class="nav-item flex items-center gap-3">
                     <i class="fa-solid fa-clock-rotate-left"></i>
                     Logs
                 </a>
 
-                <a href="{{ url('/users') }}"
-                    class="nav-item flex items-center gap-3">
+                <a href="{{ url('/users') }}" class="nav-item flex items-center gap-3">
                     <i class="fa-solid fa-users"></i>
                     Utilizadores
                 </a>
 
-                <a href="{{ route('permissions.index') }}"
-                    class="nav-item flex items-center gap-3">
+                <a href="{{ route('permissions.index') }}" class="nav-item flex items-center gap-3">
                     <i class="fa-solid fa-lock"></i>
                     Permissões
                 </a>
 
-                <a href="{{ route('company.index') }}"
-                    class="nav-item flex items-center gap-3">
+                <a href="{{ route('company.index') }}" class="nav-item flex items-center gap-3">
                     <i class="fa-solid fa-building"></i>
                     Empresa
                 </a>
 
-                <a href="{{ url('/settings') }}"
-                    class="nav-item flex items-center gap-3">
+                <a href="{{ url('/settings') }}" class="nav-item flex items-center gap-3">
                     <i class="fa-solid fa-gear"></i>
                     Configurações
                 </a>
@@ -216,8 +221,7 @@
         <div class="sidebar-footer flex-shrink-0">
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit"
-                    class="nav-item w-full flex items-center gap-3">
+                <button type="submit" class="nav-item w-full flex items-center gap-3">
                     <i class="fa-solid fa-right-from-bracket"></i>
                     Sair
                 </button>
@@ -229,18 +233,37 @@
     <div class="main-content">
         <!-- Top Navbar -->
         <nav class="bg-white shadow-sm flex-shrink-0">
-            <div class="px-6 py-3">
+            <div class="px-6 py-3 flex justify-between items-center">
                 <h1 class="text-xl font-semibold text-gray-800">
                     @yield('header', 'Dashboard')
                 </h1>
+
+                <!-- Right side: Tenant Switcher + User actions -->
+                <div class="flex items-center gap-3">
+                    <!-- Tenant Switcher -->
+                    @auth
+                        @include('layouts.tenant-switcher')
+                    @endauth
+
+                    <!-- User menu (opcional) -->
+                    <div class="relative group">
+                        <button class="flex items-center gap-2 text-gray-700 hover:text-gray-900">
+                            <div class="w-8 h-8 rounded-full bg-indigo-500 text-white flex items-center justify-center font-bold text-sm">
+                                {{ substr(auth()->user()->name ?? 'U', 0, 1) }}
+                            </div>
+                            <span class="hidden md:block text-sm">{{ auth()->user()->name ?? 'Utilizador' }}</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </nav>
 
-        <!-- Content -->
         <main class="content-area">
             @yield('content')
         </main>
     </div>
+
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 
 </html>

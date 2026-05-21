@@ -17,7 +17,8 @@ use App\Http\Controllers\{
     SettingController,
     ArchiveController,
     ClienteController,
-    CompanyController
+    CompanyController,
+    TenantController
 };
 
 use Illuminate\Support\Facades\Route;
@@ -70,9 +71,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
     Route::view('/settings', 'settings.index')->name('settings.index');
 
-    // Rotas de Logs (para ações específicas)
-    Route::get('/logs/export', [LogController::class, 'export'])->name('logs.export');
-    Route::delete('/logs/clear-old', [LogController::class, 'clearOldLogs'])->name('logs.clear-old');
+    // ==================== ROTAS DE LOGS (ATUALIZADAS) ====================
+    Route::prefix('logs')->name('logs.')->group(function () {
+        Route::get('/export', [LogController::class, 'export'])->name('export');
+        Route::delete('/clear-old', [LogController::class, 'clearOldLogs'])->name('clear-old');
+        Route::post('/clear-old', [LogController::class, 'clearOldLogs'])->name('clear-old-post'); // Alternativa POST
+    });
 
     // VIEWS com parâmetros
     Route::get('/proposals/{id}', function ($id) {
@@ -232,7 +236,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{user}/send-welcome-email', [UserController::class, 'sendWelcomeEmail'])->name('send-welcome-email');
         });
 
-        // ==================== PERMISSIONS API (NOVAS ROTAS) ====================
+        // ==================== PERMISSIONS API ====================
         Route::prefix('permissions')->name('api.permissions.')->group(function () {
             Route::get('/', [PermissionController::class, 'getRoles'])->name('get-roles');
             Route::post('/', [PermissionController::class, 'store'])->name('store');
@@ -244,12 +248,13 @@ Route::middleware(['auth'])->group(function () {
         // Lista de todas as permissões disponíveis
         Route::get('/permissions-list', [PermissionController::class, 'permissionsList'])->name('permissions.list');
 
-        // Logs API
+        // ==================== LOGS API (ATUALIZADA) ====================
         Route::prefix('logs')->name('api.logs.')->group(function () {
             Route::get('/', [LogController::class, 'index'])->name('index');
             Route::get('/export', [LogController::class, 'export'])->name('export');
             Route::get('/filters', [LogController::class, 'filters'])->name('filters');
             Route::delete('/clear', [LogController::class, 'clearOldLogs'])->name('clear-old');
+            Route::post('/clear', [LogController::class, 'clearOldLogs'])->name('clear-old-post');
         });
 
         // Settings API
@@ -271,7 +276,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/sync', [SettingController::class, 'syncSettings'])->name('sync');
         });
 
-        // Supplier Orders API (para buscar encomendas do fornecedor)
+        // Supplier Orders API
         Route::prefix('supplier-orders')->name('api.supplier-orders.')->group(function () {
             Route::get('/', [SupplierOrderController::class, 'index'])->name('index');
         });
@@ -295,4 +300,13 @@ Route::middleware(['auth'])->group(function () {
             'permissions' => $user->getAllPermissions()->pluck('name')
         ]);
     })->name('user.permissions');
+
+    Route::prefix('tenants')->name('tenants.')->middleware(['auth'])->group(function () {
+    Route::get('/', [TenantController::class, 'index'])->name('index');
+    Route::get('/create', [TenantController::class, 'create'])->name('create');
+    Route::post('/', [TenantController::class, 'store'])->name('store');
+    Route::post('/switch/{id}', [TenantController::class, 'switch'])->name('switch');
+    Route::get('/settings', [TenantController::class, 'settings'])->name('settings');
+    Route::put('/settings', [TenantController::class, 'updateSettings'])->name('update-settings');
+});
 });

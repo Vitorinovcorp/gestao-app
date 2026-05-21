@@ -5,9 +5,6 @@
     <div class="flex justify-between items-center mb-4">
         <h1 class="text-2xl font-bold">Logs do Sistema</h1>
         <div class="flex gap-2">
-            <button type="button" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-sm" onclick="confirmClearLogs()">
-                 Limpar Logs 
-            </button>
             <a href="{{ route('logs.export') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-sm">
                  Exportar CSV
             </a>
