@@ -18,7 +18,8 @@ use App\Http\Controllers\{
     ArchiveController,
     ClienteController,
     CompanyController,
-    TenantController
+    TenantController,
+    OnboardingController
 };
 
 use Illuminate\Support\Facades\Route;
@@ -283,5 +284,12 @@ Route::middleware(['auth'])->group(function () {
         Route::match(['GET', 'POST'], '/switch/{id}', [TenantController::class, 'switch'])->name('switch');
         Route::get('/settings', [TenantController::class, 'settings'])->name('settings');
         Route::put('/settings', [TenantController::class, 'updateSettings'])->name('update-settings');
+    });
+
+    Route::prefix('onboarding')->name('onboarding.')->middleware(['auth'])->group(function () {
+        Route::get('/', [OnboardingController::class, 'index'])->name('index');
+        Route::get('/step/{step?}', [OnboardingController::class, 'step'])->name('step');
+        Route::post('/process/{step}', [OnboardingController::class, 'process'])->name('process');
+        Route::get('/completed', [OnboardingController::class, 'completed'])->name('completed');
     });
 });

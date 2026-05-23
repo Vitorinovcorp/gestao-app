@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Tenant;
 use App\Services\TenantService;
+use App\Services\OnboardingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -32,16 +33,26 @@ class TenantController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'domain' => 'nullable|string|max:255',
-            'primary_color' => 'nullable|string|max:7',
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
+        // Criar o tenant e inicializar o onboarding
         $tenant = $this->tenantService->createTenant(auth()->user(), $request->all());
 
-        return redirect()->route('tenants.index')->with('success', 'Tenant criado com sucesso!');
+        // Verificar se o onboarding foi inicializado
+        $onboardingService = app(OnboardingService::class);
+        $status = $onboardingService->getStatus($tenant);
+        
+        // Se o status for 'not_started', inicializar manualmente
+        if ($status === 'not_started') {
+            $onboardingService->initializeOnboarding($tenant);
+        }
+
+        // FORÇAR REDIRECIONAMENTO PARA ONBOARDING
+        return redirect()->route('onboarding.step', ['step' => 1])->with('success', 'Tenant criado! Vamos configurar o seu ambiente.');
     }
 
     public function switch(Request $request, $id)
@@ -68,7 +79,6 @@ class TenantController extends Controller
         
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'primary_color' => 'nullable|string|max:7',
             'is_active' => 'nullable|boolean',
         ]);
 
@@ -76,7 +86,7 @@ class TenantController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $tenant->update($request->only(['name', 'primary_color', 'is_active']));
+        $tenant->update($request->only(['name', 'is_active']));
 
         return redirect()->back()->with('success', 'Configurações do tenant atualizadas!');
     }
