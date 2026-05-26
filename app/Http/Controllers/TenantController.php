@@ -39,19 +39,15 @@ class TenantController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        // Criar o tenant e inicializar o onboarding
         $tenant = $this->tenantService->createTenant(auth()->user(), $request->all());
 
-        // Verificar se o onboarding foi inicializado
         $onboardingService = app(OnboardingService::class);
         $status = $onboardingService->getStatus($tenant);
 
-        // Se o status for 'not_started', inicializar manualmente
         if ($status === 'not_started') {
             $onboardingService->initializeOnboarding($tenant);
         }
 
-        // FORÇAR REDIRECIONAMENTO PARA ONBOARDING
         return redirect()->route('onboarding.step', ['step' => 1])->with('success', 'Tenant criado! Vamos configurar o seu ambiente.');
     }
 
@@ -95,7 +91,6 @@ class TenantController extends Controller
     {
         $tenant = Tenant::findOrFail($id);
 
-        // Verificar permissões (apenas owner pode remover)
         if ($tenant->owner_id !== auth()->id()) {
             return redirect()->back()->with('error', 'Apenas o proprietário pode remover o tenant.');
         }

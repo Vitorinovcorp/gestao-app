@@ -6,8 +6,6 @@ use App\Models\Plan;
 use App\Services\SubscriptionService;
 use App\Services\TenantService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
 
 class SubscriptionController extends Controller
 {
@@ -49,7 +47,6 @@ class SubscriptionController extends Controller
     {
         $tenant = $this->tenantService->getActiveTenant();
 
-        // Verificar se já tem subscrição
         if ($tenant->subscription) {
             return redirect()->route('subscription.index')->with('error', 'Já tem uma subscrição ativa.');
         }
@@ -74,15 +71,13 @@ class SubscriptionController extends Controller
             return redirect()->back()->with('error', 'Já está neste plano.');
         }
 
-        $oldPlan = $subscription->plan; // OBTÉM O PLANO ANTES DE ALTERAR
+        $oldPlan = $subscription->plan; 
         $oldPlanId = $subscription->plan_id;
 
-        // ATUALIZAR O PLANO
         $subscription->plan_id = $plan->id;
         $subscription->save();
         $subscription->refresh();
 
-        // REGISTAR NO HISTÓRICO
         $subscription->logs()->create([
             'old_plan_id' => $oldPlanId,
             'new_plan_id' => $plan->id,

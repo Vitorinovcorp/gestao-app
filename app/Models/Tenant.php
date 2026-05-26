@@ -68,30 +68,18 @@ class Tenant extends Model
         return $this->hasMany(Activity::class);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | SUBSCRIPTIONS
-    |--------------------------------------------------------------------------
-    */
 
-    // TODAS as subscriptions
     public function subscriptions(): HasMany
     {
         return $this->hasMany(Subscription::class);
     }
 
-    // Subscription atual
     public function subscription(): HasOne
     {
         return $this->hasOne(Subscription::class)
             ->latestOfMany();
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | HELPERS
-    |--------------------------------------------------------------------------
-    */
 
     public function isOwner(User $user): bool
     {

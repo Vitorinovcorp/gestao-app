@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Services\OnboardingService;
 use App\Services\TenantService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class OnboardingController extends Controller
 {
@@ -39,17 +38,14 @@ class OnboardingController extends Controller
             return redirect()->route('tenants.create');
         }
 
-        // Se não foi passado um passo, começar do 1
         if ($step === null) {
             $step = 1;
         }
 
-        // Verificar se já completou todos os passos
         if ($step > 7) {
             return redirect()->route('onboarding.completed');
         }
 
-        // Obter o nome da tarefa com base no passo
         $taskNames = [
             1 => 'branding',
             2 => 'users',
@@ -62,12 +58,10 @@ class OnboardingController extends Controller
 
         $taskKey = $taskNames[$step] ?? null;
 
-        // Se a tarefa não existir, redirecionar para completado
         if (!$taskKey) {
             return redirect()->route('onboarding.completed');
         }
 
-        // Carregar clientes para o passo da proposta
         $clients = collect();
         if ($taskKey === 'first_proposal') {
             $clients = \App\Models\Entity::where('tenant_id', $tenant->id)
@@ -75,7 +69,6 @@ class OnboardingController extends Controller
                 ->orderBy('name')
                 ->get();
 
-            // Se não houver clientes, redirecionar para o passo 5
             if ($clients->isEmpty()) {
                 return redirect()->route('onboarding.step', ['step' => 5])
                     ->with('error', 'Crie um cliente primeiro antes de criar uma proposta.');
@@ -93,7 +86,6 @@ class OnboardingController extends Controller
             return redirect()->route('tenants.create');
         }
 
-        // Mapear passo para task_key
         $taskKeys = [
             1 => 'branding',
             2 => 'users',
@@ -110,7 +102,6 @@ class OnboardingController extends Controller
             return redirect()->route('onboarding.completed');
         }
 
-        // Processar os dados do passo
         switch ($taskKey) {
             case 'branding':
                 if ($request->has('company_name')) {
@@ -126,14 +117,11 @@ class OnboardingController extends Controller
                 break;
 
             case 'users':
-                // Lógica para convidar utilizadores
                 if ($request->has('invite_email')) {
-                    // Implementar convite
                 }
                 break;
 
             case 'permissions':
-                // Lógica para permissões
                 break;
 
             case 'company':
@@ -155,7 +143,6 @@ class OnboardingController extends Controller
                     $client->number = 'CLI-' . date('YmdHis');
                     $client->save();
 
-                    // Marcar a tarefa como concluída
                     $task = \App\Models\OnboardingTask::where('tenant_id', $tenant->id)
                         ->where('task_key', 'first_client')
                         ->first();
@@ -168,11 +155,9 @@ class OnboardingController extends Controller
 
             case 'first_article':
                 if ($request->has('article_name')) {
-                    // Obter o ID do IVA padrão (ex: 23%)
                     $vatRate = \App\Models\VatRate::where('rate', 23)->first();
                     $vatId = $vatRate ? $vatRate->id : null;
 
-                    // Se não existir taxa de IVA, criar uma padrão
                     if (!$vatId) {
                         $vatRate = \App\Models\VatRate::create([
                             'rate' => 23,
@@ -199,7 +184,6 @@ class OnboardingController extends Controller
                     $client = \App\Models\Entity::find($clientId);
 
                     if ($client) {
-                        // Gerar número único baseado no timestamp
                         $number = 'PROP-' . date('YmdHis');
 
                         \App\Models\Proposal::create([
@@ -219,7 +203,6 @@ class OnboardingController extends Controller
                 break;
         }
 
-        // Verificar se a tarefa foi marcada como concluída
         $task = \App\Models\OnboardingTask::where('tenant_id', $tenant->id)
             ->where('task_key', $taskKey)
             ->first();
@@ -231,7 +214,6 @@ class OnboardingController extends Controller
             \Log::error('Tarefa não encontrada: ' . $taskKey);
         }
 
-        // Avançar para o próximo passo
         $nextStep = $step + 1;
 
         return redirect()->route('onboarding.step', ['step' => $nextStep]);
