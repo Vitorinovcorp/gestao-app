@@ -45,7 +45,7 @@ class TenantController extends Controller
         // Verificar se o onboarding foi inicializado
         $onboardingService = app(OnboardingService::class);
         $status = $onboardingService->getStatus($tenant);
-        
+
         // Se o status for 'not_started', inicializar manualmente
         if ($status === 'not_started') {
             $onboardingService->initializeOnboarding($tenant);
@@ -76,7 +76,7 @@ class TenantController extends Controller
     public function updateSettings(Request $request)
     {
         $tenant = $this->tenantService->getActiveTenant();
-        
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'is_active' => 'nullable|boolean',
@@ -89,5 +89,19 @@ class TenantController extends Controller
         $tenant->update($request->only(['name', 'is_active']));
 
         return redirect()->back()->with('success', 'Configurações do tenant atualizadas!');
+    }
+
+    public function destroy($id)
+    {
+        $tenant = Tenant::findOrFail($id);
+
+        // Verificar permissões (apenas owner pode remover)
+        if ($tenant->owner_id !== auth()->id()) {
+            return redirect()->back()->with('error', 'Apenas o proprietário pode remover o tenant.');
+        }
+
+        $tenant->delete();
+
+        return redirect()->route('tenants.index')->with('success', 'Tenant removido com sucesso.');
     }
 }

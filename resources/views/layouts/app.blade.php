@@ -209,6 +209,12 @@
                     <i class="fa-solid fa-building"></i>
                     Empresa
                 </a>
+                
+                <a href="{{ route('subscription.index') }}"
+                    class="nav-item flex items-center gap-3">
+                    <i class="fa-solid fa-credit-card"></i>
+                    Subscrição
+                </a>
 
                 <a href="{{ url('/settings') }}" class="nav-item flex items-center gap-3">
                     <i class="fa-solid fa-gear"></i>
@@ -217,7 +223,6 @@
             </div>
         </div>
 
-        <!-- Footer -->
         <div class="sidebar-footer flex-shrink-0">
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
@@ -229,23 +234,19 @@
         </div>
     </aside>
 
-    <!-- Main Content -->
     <div class="main-content">
-        <!-- Top Navbar -->
         <nav class="bg-white shadow-sm flex-shrink-0">
             <div class="px-6 py-3 flex justify-between items-center">
                 <h1 class="text-xl font-semibold text-gray-800">
                     @yield('header', 'Dashboard')
                 </h1>
 
-                <!-- Right side: Tenant Switcher + User actions -->
                 <div class="flex items-center gap-3">
                     <!-- Tenant Switcher -->
                     @auth
-                        @include('layouts.tenant-switcher')
+                    @include('layouts.tenant-switcher')
                     @endauth
 
-                    <!-- User menu (opcional) -->
                     <div class="relative group">
                         <button class="flex items-center gap-2 text-gray-700 hover:text-gray-900">
                             <div class="w-8 h-8 rounded-full bg-indigo-500 text-white flex items-center justify-center font-bold text-sm">

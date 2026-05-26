@@ -4,13 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Tenant extends Model
 {
     protected $fillable = [
-        'name', 'slug', 'domain', 'logo', 'primary_color',
-        'settings', 'is_active', 'owner_id'
+        'name',
+        'slug',
+        'domain',
+        'logo',
+        'primary_color',
+        'settings',
+        'is_active',
+        'owner_id'
     ];
 
     protected $casts = [
@@ -21,8 +29,8 @@ class Tenant extends Model
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'tenant_user')
-                    ->withPivot('role', 'permissions')
-                    ->withTimestamps();
+            ->withPivot('role', 'permissions')
+            ->withTimestamps();
     }
 
     public function owner(): BelongsTo
@@ -30,19 +38,79 @@ class Tenant extends Model
         return $this->belongsTo(User::class, 'owner_id');
     }
 
+    public function entities(): HasMany
+    {
+        return $this->hasMany(Entity::class);
+    }
+
+    public function articles(): HasMany
+    {
+        return $this->hasMany(Article::class);
+    }
+
+    public function proposals(): HasMany
+    {
+        return $this->hasMany(Proposal::class);
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function calendarEvents(): HasMany
+    {
+        return $this->hasMany(CalendarEvent::class);
+    }
+
+    public function activities(): HasMany
+    {
+        return $this->hasMany(Activity::class);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | SUBSCRIPTIONS
+    |--------------------------------------------------------------------------
+    */
+
+    // TODAS as subscriptions
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    // Subscription atual
+    public function subscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class)
+            ->latestOfMany();
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | HELPERS
+    |--------------------------------------------------------------------------
+    */
+
     public function isOwner(User $user): bool
     {
         return $this->owner_id === $user->id;
     }
 
-    public function hasUser(User $user): bool
+    public function userRole(User $user): ?string
     {
-        return $this->users()->where('user_id', $user->id)->exists();
+        $pivot = $this->users()
+            ->where('user_id', $user->id)
+            ->first();
+
+        return $pivot ? $pivot->pivot->role : null;
     }
 
-    public function getRole(User $user): ?string
+    public function hasUser(User $user): bool
     {
-        $pivot = $this->users()->where('user_id', $user->id)->first();
-        return $pivot ? $pivot->pivot->role : null;
+        return $this->users()
+            ->where('user_id', $user->id)
+            ->exists();
     }
 }

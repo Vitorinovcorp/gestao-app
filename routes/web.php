@@ -19,13 +19,18 @@ use App\Http\Controllers\{
     ClienteController,
     CompanyController,
     TenantController,
-    OnboardingController
+    OnboardingController,
+    SubscriptionController
 };
 
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return redirect('/dashboard');
+});
+
+Route::get('/teste-upgrade', function () {
+    return response('Rota de teste funcionando!');
 });
 
 Route::get('/teste-proposta', function () {
@@ -284,6 +289,7 @@ Route::middleware(['auth'])->group(function () {
         Route::match(['GET', 'POST'], '/switch/{id}', [TenantController::class, 'switch'])->name('switch');
         Route::get('/settings', [TenantController::class, 'settings'])->name('settings');
         Route::put('/settings', [TenantController::class, 'updateSettings'])->name('update-settings');
+        Route::delete('/{id}', [TenantController::class, 'destroy'])->name('destroy');
     });
 
     Route::prefix('onboarding')->name('onboarding.')->middleware(['auth'])->group(function () {
@@ -292,4 +298,31 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/process/{step}', [OnboardingController::class, 'process'])->name('process');
         Route::get('/completed', [OnboardingController::class, 'completed'])->name('completed');
     });
+    Route::prefix('subscription')->name('subscription.')->middleware(['auth'])->group(function () {
+        Route::get('/', [SubscriptionController::class, 'index'])->name('index');
+        Route::get('/plans', [SubscriptionController::class, 'plans'])->name('plans');
+        Route::post('/subscribe/{plan}', [SubscriptionController::class, 'subscribe'])->name('subscribe');
+        Route::post('/change/{plan}', [SubscriptionController::class, 'upgrade'])->name('change');
+        Route::post('/cancel', [SubscriptionController::class, 'cancel'])->name('cancel');
+        Route::get('/logs', [SubscriptionController::class, 'logs'])->name('logs');
+        Route::get('/change-get/{plan}', [SubscriptionController::class, 'upgrade'])->name('change-get');
+    });
+
+    Route::get('/mudar-plano/{id}', function ($planId) {
+        // Buscar o tenant ativo pela sessão
+        $tenantId = session('active_tenant');
+        if (!$tenantId) {
+            return redirect('/subscription')->with('error', 'Nenhum tenant ativo encontrado.');
+        }
+
+        $subscription = \App\Models\Subscription::where('tenant_id', $tenantId)->first();
+        if (!$subscription) {
+            return redirect('/subscription')->with('error', 'Nenhuma subscrição encontrada.');
+        }
+
+        $subscription->plan_id = $planId;
+        $subscription->save();
+
+        return redirect('/subscription')->with('success', 'Plano alterado com sucesso!');
+    })->name('mudar.plano');
 });
