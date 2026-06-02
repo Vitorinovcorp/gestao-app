@@ -20,7 +20,8 @@ use App\Http\Controllers\{
     CompanyController,
     TenantController,
     OnboardingController,
-    SubscriptionController
+    SubscriptionController,
+    DealController
 };
 
 use Illuminate\Support\Facades\Route;
@@ -60,6 +61,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/api/dashboard/stats', [DashboardController::class, 'stats'])->name('dashboard.stats');
 
+    // ===== VIEWS (ROTAS HTML) =====
     Route::view('/articles', 'articles.index')->name('articles.index');
     Route::view('/entities', 'entities.index')->name('entities.index');
     Route::view('/contacts', 'contacts.index')->name('contacts.index');
@@ -100,8 +102,8 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/delete-logo', [CompanyController::class, 'deleteLogo'])->name('delete-logo');
     });
 
+    // ===== ROTAS DA API =====
     Route::prefix('api')->group(function () {
-
         Route::prefix('entities')->name('api.entities.')->group(function () {
             Route::get('/', [EntityController::class, 'index'])->name('index');
             Route::get('/clients', [EntityController::class, 'clients'])->name('clients');
@@ -111,8 +113,6 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/{entity}', [EntityController::class, 'update'])->name('update');
             Route::delete('/{entity}', [EntityController::class, 'destroy'])->name('destroy');
             Route::post('/{entity}/toggle-status', [EntityController::class, 'toggleStatus'])->name('toggle-status');
-            Route::post('/validate-nif', [EntityController::class, 'validateNif'])->name('validate-nif');
-            Route::post('/vies-check', [EntityController::class, 'viesCheck'])->name('vies-check');
         });
 
         Route::prefix('contacts')->name('api.contacts.')->group(function () {
@@ -126,7 +126,7 @@ Route::middleware(['auth'])->group(function () {
         });
 
         Route::prefix('articles')->name('api.articles.')->group(function () {
-            Route::get('/', [ArticleController::class, 'index'])->name('index');
+            Route::get('/', [ArticleController::class, 'apiIndex'])->name('index');
             Route::get('/search', [ArticleController::class, 'search'])->name('search');
             Route::post('/', [ArticleController::class, 'store'])->name('store');
             Route::get('/{article}', [ArticleController::class, 'show'])->name('show');
@@ -298,6 +298,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/process/{step}', [OnboardingController::class, 'process'])->name('process');
         Route::get('/completed', [OnboardingController::class, 'completed'])->name('completed');
     });
+
     Route::prefix('subscription')->name('subscription.')->middleware(['auth'])->group(function () {
         Route::get('/', [SubscriptionController::class, 'index'])->name('index');
         Route::get('/plans', [SubscriptionController::class, 'plans'])->name('plans');
@@ -325,4 +326,26 @@ Route::middleware(['auth'])->group(function () {
 
         return redirect('/subscription')->with('success', 'Plano alterado com sucesso!');
     })->name('mudar.plano');
+
+    Route::prefix('deals')->name('deals.')->middleware(['auth'])->group(function () {
+        Route::get('/', [DealController::class, 'index'])->name('index');
+        Route::get('/kanban', [DealController::class, 'kanban'])->name('kanban');
+        Route::get('/create', [DealController::class, 'create'])->name('create');
+        Route::post('/', [DealController::class, 'store'])->name('store');
+        Route::get('/{deal}', [DealController::class, 'show'])->name('show');
+        Route::get('/{deal}/edit', [DealController::class, 'edit'])->name('edit');
+        Route::put('/{deal}', [DealController::class, 'update'])->name('update');
+        Route::delete('/{deal}', [DealController::class, 'destroy'])->name('destroy');
+        Route::post('/{deal}/move', [DealController::class, 'move'])->name('move');
+        Route::post('/{deal}/send-proposal', [DealController::class, 'sendProposal'])->name('send-proposal');
+        Route::post('/{deal}/convert-to-invoice', [DealController::class, 'convertToInvoice'])->name('deals.convert-to-invoice');
+    });
+
+    Route::get('/permissions', function () {
+        return view('permissions.index');
+    })->name('permissions.index')->middleware(['auth']);
 });
+
+Route::get('/api/all-articles', [ArticleController::class, 'allArticles']);
+
+Route::get('/api/contacts', [ContactController::class, 'apiIndex']);

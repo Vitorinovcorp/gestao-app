@@ -209,11 +209,17 @@
                     <i class="fa-solid fa-building"></i>
                     Empresa
                 </a>
-                
+
                 <a href="{{ route('subscription.index') }}"
                     class="nav-item flex items-center gap-3">
                     <i class="fa-solid fa-credit-card"></i>
                     Subscrição
+                </a>
+
+                <a href="{{ route('deals.kanban') }}"
+                    class="nav-item flex items-center gap-3">
+                    <i class="fa-solid fa-tasks"></i>
+                    Kanban
                 </a>
 
                 <a href="{{ url('/settings') }}" class="nav-item flex items-center gap-3">

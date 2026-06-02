@@ -116,7 +116,7 @@ let vatRates = [];
 
 // Carregar artigos
 function loadArticles() {
-    fetch(`/api/articles?page=${currentPage}`)
+    fetch(`/api/all-articles?page=${currentPage}`)
         .then(response => response.json())
         .then(data => {
             renderTable(data.data);

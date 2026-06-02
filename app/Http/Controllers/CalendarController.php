@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 
 class CalendarController extends Controller
 {
-    // Eventos
     public function events(Request $request)
     {
         $query = CalendarEvent::with(['type', 'action', 'entity', 'user', 'assignedTo']);
@@ -111,7 +110,6 @@ class CalendarController extends Controller
         }
     }
     
-    // Tipos
     public function types()
     {
         return response()->json(CalendarType::where('is_active', true)->get());
@@ -144,7 +142,6 @@ class CalendarController extends Controller
         return response()->json(['success' => true]);
     }
     
-    // Ações
     public function actions()
     {
         return response()->json(CalendarAction::where('is_active', true)->get());

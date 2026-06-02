@@ -7,18 +7,21 @@ use Illuminate\Http\Request;
 
 class ContactController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $contacts = Contact::with('entity')->get();
-        return response()->json($contacts);
+        $contacts = Contact::with('entity')
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return view('contacts.index', compact('contacts'));
     }
-    
+
     public function store(Request $request)
     {
         try {
             $lastContact = Contact::orderBy('id', 'desc')->first();
             $number = $lastContact ? str_pad(intval($lastContact->number) + 1, 6, '0', STR_PAD_LEFT) : '000001';
-            
+
             $contact = Contact::create([
                 'entity_id' => $request->entity_id,
                 'number' => $number,
@@ -28,44 +31,42 @@ class ContactController extends Controller
                 'email' => $request->email,
                 'is_active' => true
             ]);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Contacto criado',
                 'contact' => $contact
             ]);
-            
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => 'Erro: ' . $e->getMessage()
             ], 500);
         }
     }
-    
+
     public function show($id)
     {
         $contact = Contact::with('entity')->findOrFail($id);
         return response()->json($contact);
     }
-    
+
     public function update(Request $request, $id)
     {
         try {
             $contact = Contact::findOrFail($id);
-            
+
             $contact->update([
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'phone' => $request->phone,
                 'email' => $request->email
             ]);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Contacto atualizado'
             ]);
-            
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -73,23 +74,31 @@ class ContactController extends Controller
             ], 500);
         }
     }
-    
+
     public function destroy($id)
     {
         try {
             $contact = Contact::findOrFail($id);
             $contact->delete();
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Contacto eliminado'
             ]);
-            
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function apiIndex(Request $request)
+    {
+        $contacts = Contact::with('entity')
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return response()->json($contacts);
     }
 }
