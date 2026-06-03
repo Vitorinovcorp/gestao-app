@@ -217,4 +217,16 @@ class DealController extends Controller
 
         return redirect()->back()->with('success', 'Fatura gerada com sucesso!');
     }
+
+    public function activateFollowUp(Request $request, Deal $deal)
+    {
+        $deal->activateFollowUp();
+        return redirect()->back()->with('success', 'Follow-up ativado com sucesso!');
+    }
+
+    public function cancelFollowUp(Request $request, Deal $deal)
+    {
+        $deal->deactivateFollowUp();
+        return redirect()->back()->with('success', 'Follow-up cancelado com sucesso!');
+    }
 }

@@ -170,6 +170,11 @@
                     Artigos
                 </a>
 
+                <a href="{{ route('deals.statistics') }}" class="nav-item flex items-center gap-3">
+                    <i class="fa-solid fa-chart-bar"></i>
+                    Estatísticas de Produtos
+                </a>
+
                 <a href="{{ url('/proposals') }}" class="nav-item flex items-center gap-3">
                     <i class="fa-solid fa-file-lines"></i>
                     Propostas

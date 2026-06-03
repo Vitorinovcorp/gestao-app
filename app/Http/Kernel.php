@@ -23,7 +23,7 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            \App\Http\Middleware\TenantMiddleware::class, // ADICIONADO AQUI
+            \App\Http\Middleware\TenantMiddleware::class,
         ],
 
         'api' => [
@@ -37,4 +37,9 @@ class Kernel extends HttpKernel
         'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
         'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
     ];
+
+    protected function schedule(Schedule $schedule)
+    {
+        $schedule->command('follow-up:process')->everyThirtyMinutes();
+    }
 }

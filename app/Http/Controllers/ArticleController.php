@@ -156,14 +156,9 @@ class ArticleController extends Controller
 
             $article->update($validated);
 
-            return response()->json([
-                'message' => 'Artigo atualizado com sucesso',
-                'article' => $article->load('vat')
-            ]);
+            return redirect()->route('deals.statistics')->with('success', 'Artigo atualizado com sucesso!'); // ← ALTERADO
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Erro ao atualizar artigo: ' . $e->getMessage()
-            ], 500);
+            return redirect()->back()->with('error', 'Erro ao atualizar artigo: ' . $e->getMessage());
         }
     }
 
@@ -234,5 +229,14 @@ class ArticleController extends Controller
             'message' => "Artigo {$status} com sucesso",
             'is_active' => $article->is_active
         ]);
+    }
+
+    public function edit(Article $article)
+    {
+        $article->load('vat');
+
+        $vatRates = \App\Models\VatRate::all();
+
+        return view('articles.edit', compact('article', 'vatRates'));
     }
 }

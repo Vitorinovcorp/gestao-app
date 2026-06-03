@@ -8,19 +8,18 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('deal_activities', function (Blueprint $table) {
+        Schema::create('deal_products', function (Blueprint $table) {
             $table->id();
             $table->foreignId('deal_id')->constrained('deals')->onDelete('cascade');
-            $table->string('type'); // call, task, meeting, note, email
-            $table->text('description');
-            $table->dateTime('scheduled_at')->nullable();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('article_id')->constrained('articles')->onDelete('cascade');
+            $table->integer('quantity')->default(1);
+            $table->decimal('price', 15, 2);
             $table->timestamps();
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('deal_activities');
+        Schema::dropIfExists('deal_products');
     }
 };
