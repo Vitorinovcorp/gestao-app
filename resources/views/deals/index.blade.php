@@ -47,7 +47,7 @@
                                 {{ $deal->stage === 'proposal' ? 'bg-purple-100 text-purple-800' : '' }}
                                 {{ $deal->stage === 'negotiation' ? 'bg-yellow-100 text-yellow-800' : '' }}
                                 {{ $deal->stage === 'follow_up' ? 'bg-orange-100 text-orange-800' : '' }}">
-                                {{ ucfirst(str_replace('_', ' ', $deal->stage)) }}
+                                {{ $deal->stage_label }}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $deal->probability }}%</td>

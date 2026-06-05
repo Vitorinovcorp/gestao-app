@@ -47,7 +47,7 @@
         @foreach(['lead', 'proposal', 'negotiation', 'follow_up', 'won', 'lost'] as $stage)
             <div class="min-w-[200px] min-h-[200px] bg-gray-100 rounded-lg p-3 flex flex-col">
                 <div class="flex justify-between items-center mb-3">
-                    <h3 class="font-semibold text-gray-700">{{ ucfirst(str_replace('_', ' ', $stage)) }}</h3>
+                    <h3 class="font-semibold text-gray-700">{{ $stageLabels[$stage] }}</h3>
                     <span class="text-xs bg-gray-200 px-2 py-1 rounded">{{ $deals->where('stage', $stage)->count() }}</span>
                 </div>
 

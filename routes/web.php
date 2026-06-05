@@ -351,6 +351,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/statistics', [DealStatisticsController::class, 'index'])->name('statistics');
         Route::get('/statistics/{article}/details', [DealStatisticsController::class, 'details'])->name('statistics.details');
         Route::get('/statistics/export', [DealStatisticsController::class, 'export'])->name('statistics.export');
+        Route::post('/{deal}/activities', [DealController::class, 'storeActivity'])->name('activities.store');
+        Route::post('/{deal}/activate-follow-up', [DealController::class, 'activateFollowUp'])->name('activate-follow-up');
+        Route::put('/{deal}/activities/{activity}', [DealController::class, 'updateActivity'])->name('activities.update');
+        Route::delete('/{deal}/activities/{activity}', [DealController::class, 'destroyActivity'])->name('activities.destroy');
     });
 
     Route::get('/permissions', function () {

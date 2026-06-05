@@ -30,6 +30,12 @@ class DealController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        // Traduzir as etapas
+        $deals->transform(function ($deal) {
+            $deal->stage_label = translateStage($deal->stage);
+            return $deal;
+        });
+
         return view('deals.index', compact('deals'));
     }
 
@@ -56,10 +62,21 @@ class DealController extends Controller
 
         $deals = $query->get();
         $stages = ['lead', 'proposal', 'negotiation', 'follow_up', 'won', 'lost'];
+
+        $stageLabels = [
+            'lead' => 'Potencial',
+            'proposal' => 'Proposta',
+            'negotiation' => 'Negociação',
+            'follow_up' => 'Atualização',
+            'won' => 'Ganho',
+            'lost' => 'Perdido'
+        ];
+
         $users = \App\Models\User::where('tenant_id', $tenant->id)->get();
 
-        return view('deals.kanban', compact('deals', 'stages', 'users'));
+        return view('deals.kanban', compact('deals', 'stages', 'stageLabels', 'users'));
     }
+
     public function create()
     {
         $tenant = $this->tenantService->getActiveTenant();
@@ -67,7 +84,6 @@ class DealController extends Controller
         $entities = Entity::where('tenant_id', $tenant->id)->orderBy('name')->get();
         $people = Person::where('tenant_id', $tenant->id)->orderBy('name')->get();
         $users = User::where('tenant_id', $tenant->id)->get();
-
 
         return view('deals.create', compact('entities', 'people', 'users'));
     }
@@ -104,9 +120,18 @@ class DealController extends Controller
 
     public function show(Deal $deal)
     {
-        $deal->load(['entity', 'person', 'owner', 'activities.user']);
+        $deal->load([
+            'entity',
+            'person',
+            'owner',
+            'activities' => function ($query) {
+                $query->orderBy('created_at', 'desc');
+            }
+        ]);
 
-        return view('deals.show', compact('deal'));
+        $users = \App\Models\User::where('tenant_id', tenant()->id)->get();
+
+        return view('deals.show', compact('deal', 'users'));
     }
 
     public function edit(Deal $deal)
@@ -115,7 +140,16 @@ class DealController extends Controller
         $people = Person::where('tenant_id', tenant()->id)->orderBy('name')->get();
         $users = \App\Models\User::where('tenant_id', tenant()->id)->get();
 
-        return view('deals.edit', compact('deal', 'entities', 'people', 'users'));
+        $stageLabels = [
+            'lead' => 'Potencial',
+            'proposal' => 'Proposta',
+            'negotiation' => 'Negociação',
+            'follow_up' => 'Atualização',
+            'won' => 'Ganho',
+            'lost' => 'Perdido'
+        ];
+
+        return view('deals.edit', compact('deal', 'entities', 'people', 'users', 'stageLabels'));
     }
 
     public function update(Request $request, Deal $deal)
@@ -141,7 +175,7 @@ class DealController extends Controller
             'expected_close_date' => $request->expected_close_date,
         ]);
 
-        return redirect()->route('deals.show', $deal->id)->with('success', 'Negócio atualizado com sucesso!');
+        return redirect()->route('deals.index')->with('success', 'Negócio atualizado com sucesso!');
     }
 
     public function destroy(Deal $deal)
@@ -228,5 +262,63 @@ class DealController extends Controller
     {
         $deal->deactivateFollowUp();
         return redirect()->back()->with('success', 'Follow-up cancelado com sucesso!');
+    }
+
+    public function storeActivity(Request $request, Deal $deal)
+    {
+        $request->validate([
+            'type' => 'required|in:call,task,meeting,note',
+            'scheduled_at' => 'nullable|date',
+            'description' => 'required|string',
+        ]);
+
+        $activity = $deal->activities()->create([
+            'type' => $request->type,
+            'description' => $request->description,
+            'scheduled_at' => $request->scheduled_at ?? now(),
+            'user_id' => $request->user_id ?? auth()->id(),
+            'subject' => $request->subject ?? '',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Atividade criada com sucesso!',
+            'activity' => $activity->load('user')
+        ]);
+    }
+
+    public function updateActivity(Request $request, Deal $deal, $activityId)
+    {
+        $activity = $deal->activities()->findOrFail($activityId);
+
+        $request->validate([
+            'type' => 'required|in:call,task,meeting,note',
+            'description' => 'required|string',
+            'scheduled_at' => 'nullable|date',
+        ]);
+
+        $activity->update([
+            'type' => $request->type,
+            'description' => $request->description,
+            'scheduled_at' => $request->scheduled_at ?? $activity->scheduled_at,
+            'user_id' => $request->user_id ?? auth()->id(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Atividade atualizada com sucesso!',
+            'activity' => $activity->load('user')
+        ]);
+    }
+
+    public function destroyActivity(Deal $deal, $activityId)
+    {
+        $activity = $deal->activities()->findOrFail($activityId);
+        $activity->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Atividade eliminada com sucesso!'
+        ]);
     }
 }
