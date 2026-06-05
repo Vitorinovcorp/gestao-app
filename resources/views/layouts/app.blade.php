@@ -210,6 +210,11 @@
                     Utilizadores
                 </a>
 
+                <a href="{{ route('public-forms.index') }}" class="nav-item flex items-center gap-3">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    Formulários Públicos
+                </a>
+
                 <a href="{{ route('permissions.index') }}" class="nav-item flex items-center gap-3">
                     <i class="fa-solid fa-lock"></i>
                     Permissões

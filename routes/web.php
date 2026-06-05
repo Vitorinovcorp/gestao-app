@@ -23,7 +23,8 @@ use App\Http\Controllers\{
     SubscriptionController,
     DealController,
     DealStatisticsController,
-    AutomationRuleController
+    AutomationRuleController,
+    PublicFormController
 };
 
 use Illuminate\Support\Facades\Route;
@@ -370,9 +371,22 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/{rule}', [AutomationRuleController::class, 'destroy'])->name('destroy');
         Route::post('/{rule}/toggle-status', [AutomationRuleController::class, 'toggleStatus'])->name('toggle-status');
     });
+
+    Route::prefix('public-forms')->name('public-forms.')->middleware(['auth'])->group(function () {
+        Route::get('/', [PublicFormController::class, 'index'])->name('index');
+        Route::get('/create', [PublicFormController::class, 'create'])->name('create');
+        Route::post('/', [PublicFormController::class, 'store'])->name('store');
+        Route::get('/{form}/edit', [PublicFormController::class, 'edit'])->name('edit');
+        Route::put('/{form}', [PublicFormController::class, 'update'])->name('update');
+        Route::delete('/{form}', [PublicFormController::class, 'destroy'])->name('destroy');
+    });
 });
 
 
 Route::get('/api/all-articles', [ArticleController::class, 'allArticles']);
 
 Route::get('/api/contacts', [ContactController::class, 'apiIndex']);
+
+Route::get('/f/{embedCode}', [PublicFormController::class, 'show'])->name('public-forms.show');
+
+Route::post('/f/{embedCode}', [PublicFormController::class, 'submit'])->name('public-forms.submit');
