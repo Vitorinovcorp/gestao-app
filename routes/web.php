@@ -22,7 +22,8 @@ use App\Http\Controllers\{
     OnboardingController,
     SubscriptionController,
     DealController,
-    DealStatisticsController
+    DealStatisticsController,
+    AutomationRuleController
 };
 
 use Illuminate\Support\Facades\Route;
@@ -355,6 +356,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/permissions', function () {
         return view('permissions.index');
     })->name('permissions.index')->middleware(['auth']);
+
+    Route::prefix('automation')->name('automation.')->middleware(['auth'])->group(function () {
+        Route::get('/', [AutomationRuleController::class, 'index'])->name('index');
+        Route::get('/create', [AutomationRuleController::class, 'create'])->name('create');
+        Route::post('/', [AutomationRuleController::class, 'store'])->name('store');
+        Route::get('/{rule}/edit', [AutomationRuleController::class, 'edit'])->name('edit');
+        Route::put('/{rule}', [AutomationRuleController::class, 'update'])->name('update');
+        Route::delete('/{rule}', [AutomationRuleController::class, 'destroy'])->name('destroy');
+        Route::post('/{rule}/toggle-status', [AutomationRuleController::class, 'toggleStatus'])->name('toggle-status');
+    });
 });
 
 

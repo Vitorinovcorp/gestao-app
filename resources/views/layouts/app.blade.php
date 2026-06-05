@@ -195,6 +195,11 @@
                     Calendário
                 </a>
 
+                <a href="{{ route('automation.index') }}" class="nav-item flex items-center gap-3">
+                    <i class="fa-solid fa-robot"></i>
+                    Automatização
+                </a>
+
                 <a href="{{ url('/logs') }}" class="nav-item flex items-center gap-3">
                     <i class="fa-solid fa-clock-rotate-left"></i>
                     Logs
