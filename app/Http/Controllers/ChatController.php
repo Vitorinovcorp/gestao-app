@@ -7,7 +7,6 @@ use App\Models\Entity;
 use App\Models\User;
 use App\Models\CalendarEvent;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use OpenAI;
 
@@ -30,7 +29,6 @@ class ChatController extends Controller
         $message = $request->input('message');
         $context = $this->getCRMContext($tenant);
 
-        // Detectar perguntas específicas para dar respostas mais diretas
         $quickResponse = $this->getQuickResponse($message, $tenant);
 
         if ($quickResponse) {
@@ -115,7 +113,6 @@ Contexto do CRM:
             return ['answer' => $answer];
         }
 
-        // Clientes mais ativos
         if (
             str_contains($messageLower, 'clientes mais ativos') ||
             (str_contains($messageLower, 'clientes') && str_contains($messageLower, 'ativos')) ||
@@ -134,7 +131,6 @@ Contexto do CRM:
                     ->get();
 
                 if ($topClients->isEmpty()) {
-                    // Buscar clientes com qualquer negócio
                     $topClients = Entity::where('tenant_id', $tenant->id)
                         ->has('deals')
                         ->withCount('deals')
@@ -160,7 +156,6 @@ Contexto do CRM:
             } catch (\Exception $e) {
                 Log::error('Erro ao buscar clientes ativos: ' . $e->getMessage());
 
-                // Fallback: buscar todos os clientes
                 $allClients = Entity::where('tenant_id', $tenant->id)
                     ->limit(5)
                     ->get();
@@ -179,7 +174,6 @@ Contexto do CRM:
             }
         }
 
-        // Negócios em Follow Up
         if (
             str_contains($messageLower, 'negócios em follow up') ||
             str_contains($messageLower, 'follow up') ||

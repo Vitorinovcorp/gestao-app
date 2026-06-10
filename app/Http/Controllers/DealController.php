@@ -23,14 +23,30 @@ class DealController extends Controller
 
     public function index()
     {
-        $tenant = $this->tenantService->getActiveTenant();
+        $user = auth()->user();
+        $tenantId = $user->tenant_id;
+
+        // Se o usuário não tiver tenant_id, usar o primeiro tenant ou 35
+        if (!$tenantId) {
+            $tenant = \App\Models\Tenant::first();
+            $tenantId = $tenant ? $tenant->id : 35;
+        }
+
+        // DEBUG - Adicione temporariamente para verificar
+        \Log::info('Deals Index', [
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'tenant_id_usado' => $tenantId
+        ]);
 
         $deals = Deal::with(['entity', 'person', 'owner'])
-            ->where('tenant_id', $tenant->id)
+            ->where('tenant_id', $tenantId)
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Traduzir as etapas
+        // DEBUG - Verificar quantos deals encontrou
+        \Log::info('Deals encontrados', ['count' => $deals->count()]);
+
         $deals->transform(function ($deal) {
             $deal->stage_label = translateStage($deal->stage);
             return $deal;
@@ -41,12 +57,12 @@ class DealController extends Controller
 
     public function kanban(Request $request)
     {
-        $tenant = $this->tenantService->getActiveTenant();
+        $user = auth()->user();
+        $tenantId = $user->tenant_id ?? 35;
 
         $query = Deal::with(['entity', 'person', 'owner'])
-            ->where('tenant_id', $tenant->id);
+            ->where('tenant_id', $tenantId);
 
-        // Filtros
         if ($request->filled('owner_id')) {
             $query->where('owner_id', $request->owner_id);
         }
@@ -72,18 +88,19 @@ class DealController extends Controller
             'lost' => 'Perdido'
         ];
 
-        $users = \App\Models\User::where('tenant_id', $tenant->id)->get();
+        $users = \App\Models\User::where('tenant_id', $tenantId)->get();
 
         return view('deals.kanban', compact('deals', 'stages', 'stageLabels', 'users'));
     }
 
     public function create()
     {
-        $tenant = $this->tenantService->getActiveTenant();
+        $user = auth()->user();
+        $tenantId = $user->tenant_id ?? 35;
 
-        $entities = Entity::where('tenant_id', $tenant->id)->orderBy('name')->get();
-        $people = Person::where('tenant_id', $tenant->id)->orderBy('name')->get();
-        $users = User::where('tenant_id', $tenant->id)->get();
+        $entities = Entity::where('tenant_id', $tenantId)->orderBy('name')->get();
+        $people = Person::where('tenant_id', $tenantId)->orderBy('name')->get();
+        $users = User::where('tenant_id', $tenantId)->get();
 
         return view('deals.create', compact('entities', 'people', 'users'));
     }
@@ -103,6 +120,16 @@ class DealController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
+        // CORREÇÃO: Usar o tenant do usuário logado
+        $user = auth()->user();
+        $tenantId = $user->tenant_id;
+
+        // Se o usuário não tiver tenant_id, usar o primeiro tenant disponível
+        if (!$tenantId) {
+            $tenant = \App\Models\Tenant::first();
+            $tenantId = $tenant ? $tenant->id : 1;
+        }
+
         $deal = Deal::create([
             'entity_id' => $request->entity_id,
             'person_id' => $request->person_id,
@@ -112,12 +139,11 @@ class DealController extends Controller
             'probability' => $request->probability ?? 0,
             'expected_close_date' => $request->expected_close_date,
             'owner_id' => auth()->id(),
-            'tenant_id' => tenant()->id,
+            'tenant_id' => $tenantId,
         ]);
 
         return redirect()->route('deals.show', $deal->id)->with('success', 'Negócio criado com sucesso!');
     }
-
     public function show(Deal $deal)
     {
         $deal->load([
@@ -129,16 +155,30 @@ class DealController extends Controller
             }
         ]);
 
-        $users = \App\Models\User::where('tenant_id', tenant()->id)->get();
+        // CORREÇÃO: Usar o tenant do usuário logado
+        $user = auth()->user();
+        $tenantId = $user->tenant_id ?? $user->id; // Se tenant_id for null, usa o user_id
 
-        return view('deals.show', compact('deal', 'users'));
+        $users = \App\Models\User::where('tenant_id', $tenantId)->get();
+
+        // Se não encontrar usuários com tenant_id, busca todos (fallback)
+        if ($users->isEmpty()) {
+            $users = \App\Models\User::all();
+        }
+
+        $entities = Entity::where('tenant_id', $tenantId)->orderBy('name')->get();
+
+        return view('deals.show', compact('deal', 'users', 'entities'));
     }
 
     public function edit(Deal $deal)
     {
-        $entities = Entity::where('tenant_id', tenant()->id)->orderBy('name')->get();
-        $people = Person::where('tenant_id', tenant()->id)->orderBy('name')->get();
-        $users = \App\Models\User::where('tenant_id', tenant()->id)->get();
+        $user = auth()->user();
+        $tenantId = $user->tenant_id ?? 35;
+
+        $entities = Entity::where('tenant_id', $tenantId)->orderBy('name')->get();
+        $people = Person::where('tenant_id', $tenantId)->orderBy('name')->get();
+        $users = \App\Models\User::where('tenant_id', $tenantId)->get();
 
         $stageLabels = [
             'lead' => 'Potencial',
@@ -196,38 +236,100 @@ class DealController extends Controller
         return response()->json(['success' => true]);
     }
 
+    /**
+     * Enviar proposta por email
+     */
     public function sendProposal(Request $request, Deal $deal)
     {
-        $request->validate([
-            'proposal_file' => 'required|file|mimes:pdf,doc,docx|max:10240',
+        $validator = Validator::make($request->all(), [
             'recipient_email' => 'required|email',
+            'subject' => 'nullable|string|max:255',
+            'email_message' => 'nullable|string',
+            'proposal_file' => 'nullable|file|mimes:pdf,doc,docx,xlsx,xls|max:10240'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        // Upload do ficheiro se foi enviado
+        if ($request->hasFile('proposal_file')) {
+            $path = $request->file('proposal_file')->store('proposals', 'public');
+            $deal->proposal_file = $path;
+        }
+
+        // Atualizar dados da proposta
+        $deal->proposal_sent_at = now();
+        $deal->proposal_sent_by = auth()->id();
+        $deal->proposal_sent_to = $request->recipient_email;
+        $deal->proposal_email_body = $request->email_message;
+        $deal->proposal_status = 'sent';
+        $deal->save();
+
+        try {
+            // Enviar email
+            Mail::to($request->recipient_email)->send(new ProposalMail($deal, $request->email_message));
+
+            // Registrar atividade
+            $deal->activities()->create([
+                'type' => 'email',
+                'description' => "Proposta comercial enviada para {$request->recipient_email}",
+                'user_id' => auth()->id(),
+                'scheduled_at' => now(),
+                'body' => $request->email_message,
+                'metadata' => json_encode([
+                    'subject' => $request->subject ?? "Proposta Comercial - {$deal->title}",
+                    'attachments' => $deal->proposal_file ? [basename($deal->proposal_file)] : []
+                ])
+            ]);
+
+            if ($request->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Proposta enviada com sucesso!']);
+            }
+
+            return redirect()->back()->with('success', 'Proposta enviada com sucesso!');
+        } catch (\Exception $e) {
+            \Log::error('Erro ao enviar proposta: ' . $e->getMessage());
+
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Erro ao enviar: ' . $e->getMessage()], 500);
+            }
+
+            return redirect()->back()->with('error', 'Erro ao enviar proposta: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Upload de ficheiro de proposta
+     */
+    public function uploadProposal(Request $request, Deal $deal)
+    {
+        $request->validate([
+            'proposal_file' => 'required|file|mimes:pdf,doc,docx,xlsx,xls|max:10240'
         ]);
 
         $path = $request->file('proposal_file')->store('proposals', 'public');
 
-        $deal->update([
-            'proposal_file' => $path,
-            'proposal_sent_at' => now(),
-            'proposal_sent_by' => auth()->id(),
-            'proposal_sent_to' => $request->recipient_email,
-            'proposal_email_body' => $request->email_message ?? null,
-            'proposal_status' => 'sent',
-        ]);
+        $deal->proposal_file = $path;
+        $deal->save();
 
-        try {
-            Mail::to($request->recipient_email)->send(new ProposalMail($deal, $request->email_message));
-
-            $deal->activities()->create([
-                'type' => 'email',
-                'description' => "Proposta enviada para {$request->recipient_email}",
-                'user_id' => auth()->id(),
-                'scheduled_at' => now(),
-            ]);
-
-            return redirect()->back()->with('success', 'Proposta enviada com sucesso!');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Erro ao enviar proposta: ' . $e->getMessage());
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'file' => basename($path)]);
         }
+
+        return redirect()->back()->with('success', 'Proposta carregada com sucesso!');
+    }
+
+    /**
+     * Download do ficheiro de proposta
+     */
+    public function downloadProposal(Deal $deal)
+    {
+        if (!$deal->proposal_file || !file_exists(storage_path('app/public/' . $deal->proposal_file))) {
+            return redirect()->back()->with('error', 'Ficheiro não encontrado.');
+        }
+
+        return response()->download(storage_path('app/public/' . $deal->proposal_file));
     }
 
     public function convertToInvoice(Deal $deal)

@@ -108,7 +108,6 @@
             object-fit: contain;
         }
 
-        /* Estilos para o Tenant Switcher */
         .tenant-switcher-btn {
             background: rgba(109, 91, 208, 0.1);
             border: 1px solid rgba(109, 91, 208, 0.2);
@@ -135,7 +134,6 @@
             background: rgba(109, 91, 208, 0.1);
         }
 
-        /* Footer styles */
         .footer {
             background: white;
             border-top: 1px solid #e5e7eb;
@@ -178,12 +176,12 @@
 
                 <a href="{{ route('chat.index') }}" class="nav-item flex items-center gap-3">
                     <i class="fa-solid fa-comment-dots"></i>
-                    Chat Inteligente
+                    Chat IA
                 </a>
 
                 <a href="{{ route('ai-suggestions.index') }}" class="nav-item flex items-center gap-3">
                     <i class="fa-solid fa-robot"></i>
-                    Sugestões AI
+                    Sugestões IA
                 </a>
 
                 <a href="{{ route('deals.kanban') }}"
@@ -299,17 +297,14 @@
             @yield('content')
         </main>
 
-        <!-- Footer -->
         <footer class="footer">
             <div class="flex flex-col md:flex-row justify-between items-center gap-3">
-                <!-- Copyright -->
                 <div class="text-center md:text-left">
                     <p class="text-sm text-gray-500">
                         © {{ date('Y') }} {{ config('app.name', 'Gestão App') }}. Todos os direitos reservados.
                     </p>
                 </div>
 
-                <!-- Links Rápidos -->
                 <div class="flex gap-6">
                     <a href="{{ route('dashboard') }}" class="text-sm text-gray-500 hover:text-indigo-600 transition">
                         Dashboard
@@ -318,14 +313,13 @@
                         Chat IA
                     </a>
                     <a href="{{ route('ai-suggestions.index') }}" class="text-sm text-gray-500 hover:text-indigo-600 transition">
-                        Sugestões AI
+                        Sugestões IA
                     </a>
                     <a href="{{ url('/proposals') }}" class="text-sm text-gray-500 hover:text-indigo-600 transition">
                         Propostas
                     </a>
                 </div>
 
-                <!-- Versão -->
                 <div class="text-center md:text-right">
                     <p class="text-xs text-gray-400">
                         Versão 1.0.0

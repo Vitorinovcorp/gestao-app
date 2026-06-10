@@ -4,6 +4,7 @@
 @section('header', 'Negócios')
 
 @section('content')
+
 <div class="bg-white rounded-lg shadow p-6">
     <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold">Lista de Negócios</h2>
@@ -32,7 +33,7 @@
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-                @foreach($deals as $deal)
+                @forelse($deals ?? [] as $deal)
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $deal->title }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -51,7 +52,7 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $deal->probability }}%</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $deal->owner->name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $deal->owner->name ?? 'N/A' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                             <a href="{{ route('deals.show', $deal->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-2">
                                 <i class="fa-solid fa-eye"></i>
@@ -68,7 +69,14 @@
                             </form>
                         </td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr>
+                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">
+                            Nenhum negócio encontrado. 
+                            <a href="{{ route('deals.create') }}" class="text-indigo-600 hover:text-indigo-800">Criar primeiro negócio</a>
+                        </td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     </div>

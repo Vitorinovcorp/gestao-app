@@ -104,7 +104,6 @@
 </style>
 
 <div class="chat-full-width">
-    <!-- Sugestões Rápidas -->
     <div class="quick-buttons">
         <p class="text-sm text-gray-600 mb-2">Sugestões rápidas:</p>
         <div class="flex flex-wrap gap-2">
@@ -123,7 +122,6 @@
         </div>
     </div>
     
-    <!-- Mensagens do Chat -->
     <div id="chat-messages" class="chat-messages">
         <div class="message-bot">
             <div class="bubble">
@@ -132,7 +130,6 @@
         </div>
     </div>
     
-    <!-- Input do Chat -->
     <div class="chat-input-area">
         <div class="flex gap-2">
             <input type="text" 
@@ -198,7 +195,6 @@
         const div = document.createElement('div');
         div.className = sender === 'user' ? 'message-user' : 'message-bot';
         
-        // Converter markdown simples para HTML
         let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         formattedText = formattedText.replace(/\n/g, '<br>');
         

@@ -20,7 +20,6 @@ class TestOpenAI extends Command
         $this->line('═══════════════════════════════════════════════');
         $this->newLine();
 
-        // 1. Teste Configuração
         $this->info('📋 1. TESTE DE CONFIGURAÇÃO');
         $this->line('───────────────────────────────────────────────');
 
@@ -37,7 +36,6 @@ class TestOpenAI extends Command
         $timeout = config('openai.request_timeout', 30);
         $this->line('✅ Timeout: ' . $timeout . ' segundos');
 
-        // 2. Teste Conexão OpenAI
         $this->newLine();
         $this->info('🌐 2. TESTE API OPENAI');
         $this->line('───────────────────────────────────────────────');
@@ -67,13 +65,11 @@ class TestOpenAI extends Command
             return 1;
         }
 
-        // 3. TESTE BANCO DE DADOS CRM
         $this->newLine();
         $this->info('💾 3. TESTE BANCO DE DADOS CRM');
         $this->line('───────────────────────────────────────────────');
 
         try {
-            // Tentar obter tenant do contexto ou buscar primeiro ativo
             $tenant = tenant();
 
             if (!$tenant) {
@@ -98,7 +94,6 @@ class TestOpenAI extends Command
                 $eventCount = \App\Models\CalendarEvent::where('tenant_id', $tenant->id)->count();
                 $this->line('✅ Eventos: ' . $eventCount);
 
-                // Mostrar alguns negócios como exemplo
                 if ($dealCount > 0) {
                     $this->newLine();
                     $this->line('📊 Amostra de negócios:');
@@ -120,7 +115,6 @@ class TestOpenAI extends Command
             $this->error('❌ Erro no banco de dados: ' . $e->getMessage());
         }
 
-        // 4. Teste Completo com Contexto
         $this->newLine();
         $this->info('🎯 4. TESTE COMPLETO (CRM Contexto)');
         $this->line('───────────────────────────────────────────────');
@@ -149,7 +143,6 @@ class TestOpenAI extends Command
             $this->error('❌ Erro no teste completo: ' . $e->getMessage());
         }
 
-        // 5. Teste do Job (se aplicável)
         $this->newLine();
         $this->info('⚙️ 5. VERIFICANDO SUGESTÕES AI');
         $this->line('───────────────────────────────────────────────');

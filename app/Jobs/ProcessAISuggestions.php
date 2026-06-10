@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Models\Deal;
-use App\Models\DealActivity;
 use App\Models\AISuggestion;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -30,7 +29,6 @@ class ProcessAISuggestions implements ShouldQueue
     {
         Log::info("ProcessAISuggestions iniciado para tenant: {$this->tenantId}");
         
-        // Processar negócios em andamento (não ganhos nem perdidos)
         $deals = Deal::with(['activities', 'entity', 'owner'])
             ->where('tenant_id', $this->tenantId)
             ->where('stage', '!=', 'won')
@@ -51,7 +49,6 @@ class ProcessAISuggestions implements ShouldQueue
     
     protected function analyzeDeal(Deal $deal)
     {
-        // Verificar se já tem sugestão pendente recente (últimas 24h)
         $recentSuggestion = AISuggestion::where('deal_id', $deal->id)
             ->where('status', 'pending')
             ->where('created_at', '>', now()->subHours(24))
@@ -96,7 +93,6 @@ class ProcessAISuggestions implements ShouldQueue
         $lastActivityDate = $lastActivity ? $lastActivity->created_at->format('d/m/Y H:i') : 'Nenhuma atividade';
         $lastActivityDesc = $lastActivity ? $lastActivity->description : 'Nenhuma';
         
-        // Últimas 5 atividades para contexto
         $recentActivities = $deal->activities()
             ->latest()
             ->limit(5)
@@ -139,7 +135,6 @@ Descrição: {$lastActivityDesc}
     {
         $lastActivity = $deal->activities()->latest()->first();
         if (!$lastActivity) {
-            // Se nunca teve atividade, considerar desde a criação
             return now()->diffInDays($deal->created_at);
         }
         
@@ -155,9 +150,8 @@ Descrição: {$lastActivityDesc}
         
         $description = strtolower($lastActivity->description);
         
-        // Palavras positivas
         $positiveWords = ['interessado', 'gostou', 'aprovou', 'fechar', 'avançar', 'positivo', 'otimo', 'bom'];
-        // Palavras negativas
+    
         $negativeWords = ['problema', 'reclamou', 'caro', 'duvida', 'negativo', 'ruim', 'cancelar', 'desistiu'];
         
         $positiveCount = 0;
@@ -209,7 +203,6 @@ NÃO INCLUA TEXTO FORA DO JSON.
     
     protected function parseSuggestionResponse($response)
     {
-        // Extrair JSON da resposta
         preg_match('/\{.*\}/s', $response, $matches);
         
         if (!isset($matches[0])) {
@@ -222,7 +215,6 @@ NÃO INCLUA TEXTO FORA DO JSON.
             throw new \Exception('JSON inválido');
         }
         
-        // Valores padrão
         return [
             'type' => $data['type'] ?? 'task',
             'title' => $data['title'] ?? 'Sugestão de ação',
@@ -275,7 +267,6 @@ NÃO INCLUA TEXTO FORA DO JSON.
     
     protected function createFallbackSuggestion(Deal $deal, $daysWithoutContact)
     {
-        // Sugestão de fallback baseada em regras simples
         $title = '📞 Sugestão de follow-up';
         $description = 'O negócio está sem atualização há ' . $daysWithoutContact . ' dias.';
         $reason = 'Baseado em regras automáticas de negócios parados';

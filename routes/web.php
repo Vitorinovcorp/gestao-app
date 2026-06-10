@@ -359,6 +359,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/{deal}/activate-follow-up', [DealController::class, 'activateFollowUp'])->name('activate-follow-up');
         Route::put('/{deal}/activities/{activity}', [DealController::class, 'updateActivity'])->name('activities.update');
         Route::delete('/{deal}/activities/{activity}', [DealController::class, 'destroyActivity'])->name('activities.destroy');
+        Route::post('/{deal}/send-proposal', [DealController::class, 'sendProposal'])->name('send-proposal');
+        Route::post('/{deal}/upload-proposal', [DealController::class, 'uploadProposal'])->name('upload-proposal');
+        Route::get('/{deal}/download-proposal', [DealController::class, 'downloadProposal'])->name('download-proposal');
     });
 
     Route::get('/permissions', function () {
