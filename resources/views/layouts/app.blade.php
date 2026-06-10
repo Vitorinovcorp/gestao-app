@@ -36,6 +36,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            z-index: 50;
         }
 
         .sidebar-nav {
@@ -133,13 +134,19 @@
         .tenant-option.active {
             background: rgba(109, 91, 208, 0.1);
         }
+
+        /* Footer styles */
+        .footer {
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 1rem 1.5rem;
+            flex-shrink: 0;
+        }
     </style>
 </head>
 
 <body>
-    <!-- Sidebar -->
     <aside class="sidebar text-white">
-        <!-- Logo -->
         <div class="logo-area flex-shrink-0">
             <div class="font-bold flex items-center gap-2">
                 <img src="{{ asset('images/inovcorp-logo.png') }}" alt="Logo" class="logo-img">
@@ -147,7 +154,6 @@
             </div>
         </div>
 
-        <!-- Menu -->
         <div class="sidebar-nav px-3">
             <div class="space-y-1 menu-space">
                 <a href="{{ url('/dashboard') }}" class="nav-item flex items-center gap-3">
@@ -168,6 +174,22 @@
                 <a href="{{ url('/articles') }}" class="nav-item flex items-center gap-3">
                     <i class="fa-solid fa-box"></i>
                     Artigos
+                </a>
+
+                <a href="{{ route('chat.index') }}" class="nav-item flex items-center gap-3">
+                    <i class="fa-solid fa-comment-dots"></i>
+                    Chat Inteligente
+                </a>
+
+                <a href="{{ route('ai-suggestions.index') }}" class="nav-item flex items-center gap-3">
+                    <i class="fa-solid fa-robot"></i>
+                    Sugestões AI
+                </a>
+
+                <a href="{{ route('deals.kanban') }}"
+                    class="nav-item flex items-center gap-3">
+                    <i class="fa-solid fa-tasks"></i>
+                    Kanban
                 </a>
 
                 <a href="{{ route('deals.statistics') }}" class="nav-item flex items-center gap-3">
@@ -225,26 +247,10 @@
                     Empresa
                 </a>
 
-                <a href="{{ route('chat.index') }}" class="nav-item flex items-center gap-3">
-                    <i class="fa-solid fa-comment-dots"></i>
-                    Chat Inteligente
-                </a>
-
-                <a href="{{ route('ai-suggestions.index') }}" class="nav-item flex items-center gap-3">
-                    <i class="fa-solid fa-robot"></i>
-                    Sugestões AI
-                </a>
-
                 <a href="{{ route('subscription.index') }}"
                     class="nav-item flex items-center gap-3">
                     <i class="fa-solid fa-credit-card"></i>
                     Subscrição
-                </a>
-
-                <a href="{{ route('deals.kanban') }}"
-                    class="nav-item flex items-center gap-3">
-                    <i class="fa-solid fa-tasks"></i>
-                    Kanban
                 </a>
 
                 <a href="{{ url('/settings') }}" class="nav-item flex items-center gap-3">
@@ -273,7 +279,6 @@
                 </h1>
 
                 <div class="flex items-center gap-3">
-                    <!-- Tenant Switcher -->
                     @auth
                     @include('layouts.tenant-switcher')
                     @endauth
@@ -293,6 +298,41 @@
         <main class="content-area">
             @yield('content')
         </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-3">
+                <!-- Copyright -->
+                <div class="text-center md:text-left">
+                    <p class="text-sm text-gray-500">
+                        © {{ date('Y') }} {{ config('app.name', 'Gestão App') }}. Todos os direitos reservados.
+                    </p>
+                </div>
+
+                <!-- Links Rápidos -->
+                <div class="flex gap-6">
+                    <a href="{{ route('dashboard') }}" class="text-sm text-gray-500 hover:text-indigo-600 transition">
+                        Dashboard
+                    </a>
+                    <a href="{{ route('chat.index') }}" class="text-sm text-gray-500 hover:text-indigo-600 transition">
+                        Chat IA
+                    </a>
+                    <a href="{{ route('ai-suggestions.index') }}" class="text-sm text-gray-500 hover:text-indigo-600 transition">
+                        Sugestões AI
+                    </a>
+                    <a href="{{ url('/proposals') }}" class="text-sm text-gray-500 hover:text-indigo-600 transition">
+                        Propostas
+                    </a>
+                </div>
+
+                <!-- Versão -->
+                <div class="text-center md:text-right">
+                    <p class="text-xs text-gray-400">
+                        Versão 1.0.0
+                    </p>
+                </div>
+            </div>
+        </footer>
     </div>
 
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
