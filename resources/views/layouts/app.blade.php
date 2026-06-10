@@ -225,6 +225,16 @@
                     Empresa
                 </a>
 
+                <a href="{{ route('chat.index') }}" class="nav-item flex items-center gap-3">
+                    <i class="fa-solid fa-comment-dots"></i>
+                    Chat Inteligente
+                </a>
+
+                <a href="{{ route('ai-suggestions.index') }}" class="nav-item flex items-center gap-3">
+                    <i class="fa-solid fa-robot"></i>
+                    Sugestões AI
+                </a>
+
                 <a href="{{ route('subscription.index') }}"
                     class="nav-item flex items-center gap-3">
                     <i class="fa-solid fa-credit-card"></i>

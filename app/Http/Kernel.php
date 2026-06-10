@@ -42,5 +42,15 @@ class Kernel extends HttpKernel
     {
         $schedule->command('follow-up:process')->everyThirtyMinutes();
         $schedule->command('automation:run')->daily();
+        $schedule->command('ai-agent:run 30')->daily();
+
+        $schedule->call(function () {
+            $tenants = \App\Models\Tenant::where('is_active', 1)->get();
+            foreach ($tenants as $tenant) {
+                dispatch(new \App\Jobs\ProcessAISuggestions($tenant->id));
+            }
+        })->dailyAt('02:00');
+
+        $schedule->command('queue:work --once')->everySixHours();
     }
 }

@@ -24,7 +24,10 @@ use App\Http\Controllers\{
     DealController,
     DealStatisticsController,
     AutomationRuleController,
-    PublicFormController
+    PublicFormController,
+    ChatController,
+    AISuggestionController,
+    Api\SuggestionController
 };
 
 use Illuminate\Support\Facades\Route;
@@ -380,12 +383,31 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/{form}', [PublicFormController::class, 'update'])->name('update');
         Route::delete('/{form}', [PublicFormController::class, 'destroy'])->name('destroy');
     });
-});
 
+    Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
+
+
+    Route::prefix('ai-suggestions')->name('ai-suggestions.')->middleware(['auth'])->group(function () {
+        Route::get('/', [AISuggestionController::class, 'index'])->name('index');
+        Route::post('/{suggestion}/accept', [AISuggestionController::class, 'accept'])->name('accept');
+        Route::post('/{suggestion}/dismiss', [AISuggestionController::class, 'dismiss'])->name('dismiss');
+        Route::post('/{suggestion}/archive', [AISuggestionController::class, 'archive'])->name('archive');
+    });
+
+    Route::middleware(['auth:sanctum'])->group(function () {
+        Route::get('/suggestions', [SuggestionController::class, 'index']);
+        Route::post('/suggestions/{id}/accept', [SuggestionController::class, 'accept']);
+        Route::post('/suggestions/{id}/dismiss', [SuggestionController::class, 'dismiss']);
+        Route::post('/suggestions/{id}/postpone', [SuggestionController::class, 'postpone']);
+        Route::get('/suggestions/stats', [SuggestionController::class, 'stats']);
+    });
+});
 
 Route::get('/api/all-articles', [ArticleController::class, 'allArticles']);
 
 Route::get('/api/contacts', [ContactController::class, 'apiIndex']);
+
+Route::post('/api/chat', [ChatController::class, 'chat'])->name('chat.chat');
 
 Route::get('/f/{embedCode}', [PublicFormController::class, 'show'])->name('public-forms.show');
 
