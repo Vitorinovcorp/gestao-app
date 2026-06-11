@@ -43,4 +43,9 @@ class Article extends Model
         }
         return null;
     }
+
+    public function dealLines()
+    {
+        return $this->hasMany(DealLine::class, 'article_id');
+    }
 }

@@ -45,26 +45,49 @@ class Deal extends Model
         return $this->belongsTo(Tenant::class);
     }
 
+    public function products(): HasMany
+    {
+        return $this->hasMany(DealProduct::class);
+    }
+
     public function activateFollowUp()
     {
-        $this->update([
-            'follow_up_active' => true,
-            'follow_up_started_at' => now(),
-            'follow_up_next_send_at' => now()->addDay(),
-            'follow_up_email_index' => 0,
-        ]);
+        $this->follow_up_active = true;
+        $this->follow_up_started_at = now();
+        $this->follow_up_email_index = 0;
+        $this->follow_up_next_send_at = $this->getNextBusinessDate(now()->addHours(2));
+        $this->save();
     }
 
     public function deactivateFollowUp()
     {
-        $this->update([
-            'follow_up_active' => false,
-            'follow_up_cancelled_at' => now(),
-        ]);
+        $this->follow_up_active = false;
+        $this->follow_up_cancelled_at = now();
+        $this->save();
     }
 
-    public function products(): HasMany
+    public function getNextBusinessDate($date)
     {
-        return $this->hasMany(DealProduct::class);
+        $date = \Carbon\Carbon::parse($date);
+
+        while ($date->isWeekend()) {
+            $date->addDay();
+        }
+
+        $hour = (int) $date->format('H');
+        if ($hour < 9) {
+            $date->hour = 9;
+        } elseif ($hour >= 18) {
+            $date->addDay();
+            $date->hour = 9;
+        }
+        $date->minute = 0;
+
+        return $date;
+    }
+
+    public function followUpEmails()
+    {
+        return $this->hasMany(FollowUpEmail::class);
     }
 }

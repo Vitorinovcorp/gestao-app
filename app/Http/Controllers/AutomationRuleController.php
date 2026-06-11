@@ -12,7 +12,7 @@ class AutomationRuleController extends Controller
     {
         $rules = AutomationRule::where('tenant_id', tenant()->id)
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(15);  // ← Use paginate() em vez de get()
 
         $priorityMap = [
             'low' => 'Baixa',
@@ -44,7 +44,6 @@ class AutomationRuleController extends Controller
 
         return view('automation.index', compact('rules'));
     }
-
     public function create()
     {
         return view('automation.create');

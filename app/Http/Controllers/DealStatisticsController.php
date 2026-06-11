@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Deal;
 use App\Models\Article;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -11,17 +12,20 @@ class DealStatisticsController extends Controller
 {
     public function index(Request $request)
     {
-        $query = DB::table('deal_products')
-            ->join('deals', 'deal_products.deal_id', '=', 'deals.id')
-            ->join('articles', 'deal_products.article_id', '=', 'articles.id')
+        $user = auth()->user();
+        $tenantId = $user->tenant_id ?? 35;
+
+        $query = DB::table('deal_lines')
+            ->join('deals', 'deal_lines.deal_id', '=', 'deals.id')
+            ->join('articles', 'deal_lines.article_id', '=', 'articles.id')
             ->select(
                 'articles.id',
                 'articles.name as article_name',
                 'articles.reference',
-                DB::raw('SUM(deal_products.quantity) as total_quantity'),
-                DB::raw('SUM(deal_products.quantity * deal_products.price) as total_value')
+                DB::raw('SUM(deal_lines.quantity) as total_quantity'),
+                DB::raw('SUM(deal_lines.total_price) as total_value')
             )
-            ->where('deals.tenant_id', tenant()->id);
+            ->where('deals.tenant_id', $tenantId);
 
         // Filtros
         if ($request->filled('stage')) {
@@ -44,29 +48,35 @@ class DealStatisticsController extends Controller
             ->orderByDesc('total_value')
             ->paginate($request->get('per_page', 15));
 
-        return view('deals.statistics', compact('stats'));
+        $users = User::where('tenant_id', $tenantId)->get();
+        $stages = ['lead', 'proposal', 'negotiation', 'follow_up', 'won', 'lost'];
+
+        return view('deals.statistics', compact('stats', 'users', 'stages'));
     }
 
     public function details($id)
     {
-        $article = Article::with(['dealProducts.deal.entity', 'dealProducts.deal.owner'])
+        $article = Article::with(['dealLines.deal.entity', 'dealLines.deal.owner'])
             ->findOrFail($id);
 
-        return view('deals.article-details', compact('article'));
+        return view('deals.statistics-details', compact('article'));
     }
 
     public function export(Request $request)
     {
-        $query = DB::table('deal_products')
-            ->join('deals', 'deal_products.deal_id', '=', 'deals.id')
-            ->join('articles', 'deal_products.article_id', '=', 'articles.id')
+        $user = auth()->user();
+        $tenantId = $user->tenant_id ?? 35;
+
+        $query = DB::table('deal_lines')
+            ->join('deals', 'deal_lines.deal_id', '=', 'deals.id')
+            ->join('articles', 'deal_lines.article_id', '=', 'articles.id')
             ->select(
                 'articles.reference',
                 'articles.name as article_name',
-                DB::raw('SUM(deal_products.quantity) as total_quantity'),
-                DB::raw('SUM(deal_products.quantity * deal_products.price) as total_value')
+                DB::raw('SUM(deal_lines.quantity) as total_quantity'),
+                DB::raw('SUM(deal_lines.total_price) as total_value')
             )
-            ->where('deals.tenant_id', tenant()->id);
+            ->where('deals.tenant_id', $tenantId);
 
         if ($request->filled('stage')) {
             $query->where('deals.stage', $request->stage);
@@ -90,14 +100,14 @@ class DealStatisticsController extends Controller
 
         $filename = 'estatisticas_produtos_' . date('Ymd_His') . '.csv';
         $handle = fopen('php://temp', 'w');
-        fputcsv($handle, ['Referência', 'Produto', 'Quantidade Total', 'Valor Total']);
+        fputcsv($handle, ['Referência', 'Produto', 'Quantidade Total', 'Valor Total (€)']);
 
         foreach ($stats as $stat) {
             fputcsv($handle, [
                 $stat->reference,
                 $stat->article_name,
                 $stat->total_quantity,
-                $stat->total_value
+                number_format($stat->total_value, 2)
             ]);
         }
 
@@ -106,7 +116,7 @@ class DealStatisticsController extends Controller
         fclose($handle);
 
         return response($csv, 200)
-            ->header('Content-Type', 'text/csv')
+            ->header('Content-Type', 'text/csv; charset=utf-8')
             ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 }

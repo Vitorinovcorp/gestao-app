@@ -109,7 +109,7 @@
 
     <!-- SEÇÃO DE PROPOSTA -->
     <div class="border-t pt-6 mb-6">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4"> Proposta Comercial</h3>
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">📄 Proposta Comercial</h3>
         
         @if($deal->proposal_file)
             <div class="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -152,7 +152,7 @@
     <!-- Follow-up Automático -->
     @if($deal->stage === 'follow_up')
     <div class="border-t pt-6 mb-6">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4">Follow-up Automático</h3>
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">⏰ Follow-up Automático</h3>
         @if($deal->follow_up_active)
             <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <p class="text-sm text-gray-600">
@@ -177,8 +177,9 @@
     </div>
     @endif
 
+    <!-- Criação Rápida de Atividades -->
     <div class="border-t pt-6 mb-6">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4">Criação Rápida de Atividade</h3>
+        <h3 class="text-lg font-semibold text-gray-800 mb-4"> Criação Rápida de Atividade</h3>
         <form id="quickActivityForm" class="bg-gray-50 p-4 rounded-lg">
             @csrf
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

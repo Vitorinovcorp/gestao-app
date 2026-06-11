@@ -338,32 +338,29 @@ Route::middleware(['auth'])->group(function () {
         return redirect('/subscription')->with('success', 'Plano alterado com sucesso!');
     })->name('mudar.plano');
 
-    Route::prefix('deals')->name('deals.')->middleware(['auth'])->group(function () {
-        Route::get('/', [DealController::class, 'index'])->name('index');
-        Route::get('/kanban', [DealController::class, 'kanban'])->name('kanban');
-        Route::get('/create', [DealController::class, 'create'])->name('create');
-        Route::post('/', [DealController::class, 'store'])->name('store');
-        Route::get('/{deal}', [DealController::class, 'show'])->name('show');
-        Route::get('/{deal}/edit', [DealController::class, 'edit'])->name('edit');
-        Route::put('/{deal}', [DealController::class, 'update'])->name('update');
-        Route::delete('/{deal}', [DealController::class, 'destroy'])->name('destroy');
-        Route::post('/{deal}/move', [DealController::class, 'move'])->name('move');
-        Route::post('/{deal}/send-proposal', [DealController::class, 'sendProposal'])->name('send-proposal');
-        Route::post('/{deal}/convert-to-invoice', [DealController::class, 'convertToInvoice'])->name('deals.convert-to-invoice');
-        Route::post('/deals/{deal}/activate-follow-up', [DealController::class, 'activateFollowUp'])->name('deals.activate-follow-up');
-        Route::post('/deals/{deal}/cancel-follow-up', [DealController::class, 'cancelFollowUp'])->name('deals.cancel-follow-up');
-        Route::get('/statistics', [DealStatisticsController::class, 'index'])->name('statistics');
-        Route::get('/statistics/{article}/details', [DealStatisticsController::class, 'details'])->name('statistics.details');
-        Route::get('/statistics/export', [DealStatisticsController::class, 'export'])->name('statistics.export');
-        Route::post('/{deal}/activities', [DealController::class, 'storeActivity'])->name('activities.store');
-        Route::post('/{deal}/activate-follow-up', [DealController::class, 'activateFollowUp'])->name('activate-follow-up');
-        Route::put('/{deal}/activities/{activity}', [DealController::class, 'updateActivity'])->name('activities.update');
-        Route::delete('/{deal}/activities/{activity}', [DealController::class, 'destroyActivity'])->name('activities.destroy');
-        Route::post('/{deal}/send-proposal', [DealController::class, 'sendProposal'])->name('send-proposal');
-        Route::post('/{deal}/upload-proposal', [DealController::class, 'uploadProposal'])->name('upload-proposal');
-        Route::get('/{deal}/download-proposal', [DealController::class, 'downloadProposal'])->name('download-proposal');
-    });
-
+   Route::prefix('deals')->name('deals.')->middleware(['auth'])->group(function () {
+    Route::get('/', [DealController::class, 'index'])->name('index');
+    Route::get('/kanban', [DealController::class, 'kanban'])->name('kanban');
+    Route::get('/create', [DealController::class, 'create'])->name('create');
+    Route::post('/', [DealController::class, 'store'])->name('store');
+    Route::get('/{deal}', [DealController::class, 'show'])->name('show');
+    Route::get('/{deal}/edit', [DealController::class, 'edit'])->name('edit');
+    Route::put('/{deal}', [DealController::class, 'update'])->name('update');
+    Route::delete('/{deal}', [DealController::class, 'destroy'])->name('destroy');
+    Route::post('/{deal}/move', [DealController::class, 'move'])->name('move');
+    Route::post('/{deal}/convert-to-invoice', [DealController::class, 'convertToInvoice'])->name('convert-to-invoice');
+    Route::post('/{deal}/activate-follow-up', [DealController::class, 'activateFollowUp'])->name('activate-follow-up');
+    Route::post('/{deal}/cancel-follow-up', [DealController::class, 'cancelFollowUp'])->name('cancel-follow-up');
+    Route::post('/{deal}/send-proposal', [DealController::class, 'sendProposal'])->name('send-proposal');
+    Route::post('/{deal}/upload-proposal', [DealController::class, 'uploadProposal'])->name('upload-proposal');
+    Route::get('/{deal}/download-proposal', [DealController::class, 'downloadProposal'])->name('download-proposal');
+    Route::post('/{deal}/activities', [DealController::class, 'storeActivity'])->name('activities.store');
+    Route::put('/{deal}/activities/{activity}', [DealController::class, 'updateActivity'])->name('activities.update');
+    Route::delete('/{deal}/activities/{activity}', [DealController::class, 'destroyActivity'])->name('activities.destroy');
+    Route::get('/statistics', [DealStatisticsController::class, 'index'])->name('statistics');
+    Route::get('/statistics/{article}/details', [DealStatisticsController::class, 'details'])->name('statistics.details');
+    Route::get('/statistics/export', [DealStatisticsController::class, 'export'])->name('statistics.export');
+});
     Route::get('/permissions', function () {
         return view('permissions.index');
     })->name('permissions.index')->middleware(['auth']);

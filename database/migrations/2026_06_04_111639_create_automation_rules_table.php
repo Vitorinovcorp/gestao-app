@@ -11,12 +11,16 @@ return new class extends Migration
         Schema::create('automation_rules', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('trigger_type'); // inactivity_days, stage_change, etc.
-            $table->json('conditions'); // { "days": 5, "stage": "follow_up" }
-            $table->string('action_type'); // create_activity, send_notification, etc.
-            $table->json('action_config'); // { "activity_type": "task", "priority": "high" }
-            $table->foreignId('tenant_id')->constrained('tenants')->onDelete('cascade');
+            $table->text('description')->nullable();
+            $table->string('trigger_type')->default('inactivity'); // inactivity, stage_change, etc
+            $table->integer('inactivity_days')->default(5); // dias sem atividade
+            $table->json('conditions')->nullable(); // condições adicionais
+            $table->string('action_type')->default('create_activity'); // create_activity, send_email, etc
+            $table->string('activity_type')->default('task'); // call, task, meeting, note
+            $table->string('activity_priority')->default('medium'); // high, medium, low
+            $table->boolean('send_notification')->default(true);
             $table->boolean('is_active')->default(true);
+            $table->unsignedBigInteger('tenant_id');
             $table->timestamps();
         });
     }
